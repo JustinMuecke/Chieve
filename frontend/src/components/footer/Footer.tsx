@@ -1,17 +1,23 @@
-import style from './footer.module.scss';
-
+import style from "./footer.module.scss";
 
 function Footer() {
-    return (
-        <footer className={style.footer}>
-            <h4>Best team combinations</h4>
-            <p>Discover the hackathon improved overview of your Gaming Achievements from Steam and ...</p>
-            <p>Are you better than your friends or do you need to play more? Find out now!</p>
-            <p>© 2026 Your Company. All rights reserved.</p>
-        </footer>
-    );
+  return (
+    <footer className={style.footer}>
+      <div className={style.footerContent}>
+        <div>
+          <h3 className={style.footerTitle}>Best team combinations</h3>
+          <p className={style.footerText}>
+            Discover your gaming achievements across different platforms.
+          </p>
+        </div>
+
+        <div className={style.footerMeta}>
+          <p>© 2026 Your Company</p>
+          <p>All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+  );
 }
 
-/* Exports*/
 export default Footer;
-

@@ -1,24 +1,30 @@
-import style from './header.module.scss';
-
+import { Link, useNavigate } from "react-router-dom";
 import logoImage from "../../assets/logoImg.png";
+import style from "./header.module.scss";
 
 function Header() {
-    /* Header content */
-    return (
-        <header className={style.header}>
-            <img src={logoImage} alt="Logo" style={{ width: '15%', height: 'auto' }} />
-            <h1>Website Name</h1>
-            <nav>
-                <ul>
-                    <li><a href="/Profile">Profile</a></li>
-                    <li><a href="/Games">Games</a></li>
-                    <li><a href="/Ranglist">Ranking</a></li>
-                </ul>
-            </nav>
-        </header>
-    );
+  const navigate = useNavigate();
+
+  return (
+    <header className={style.header}>
+      <div className={style.brand}>
+        <img src={logoImage} alt="Website Logo" className={style.logo} />
+        <h1 className={style.title}>Chieve Collector</h1>
+      </div>
+
+      <div className={style.rightArea}>
+        <nav className={style.nav}>
+          <Link to="/profile">Profile</Link>
+          <Link to="/games">Games</Link>
+          <Link to="/ranking">Ranking</Link>    
+        </nav>
+
+        <button className={style.backButton} onClick={() => navigate(-1)}>
+          ←
+        </button>
+      </div>
+    </header>
+  );
 }
 
-/* Exports*/
 export default Header;
-
