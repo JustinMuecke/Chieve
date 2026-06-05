@@ -10,20 +10,18 @@ import Ranglist from "./pages/RanglistPage";
 
 function App() {
   return (
-    <>
+    <div>
       <Header />
 
-      <main>
-        <Routes>
-          <Route path="/" element={<MainPage />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/games" element={<Games />} />
-          <Route path="/ranking" element={<Ranglist />} />
-        </Routes>
-      </main>
+      <Routes>
+        <Route path="/" element={<MainPage />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/games" element={<Games />} />
+        <Route path="/ranking" element={<Ranglist />} />
+      </Routes>
 
       <Footer />
-    </>
+    </div>
   );
 }
 

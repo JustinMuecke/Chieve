@@ -1,0 +1,94 @@
+.map {
+  position: relative;
+  width: 520px;
+  height: 420px;
+  margin: 0 auto;
+}
+
+.hex {
+  position: absolute;
+  width: 120px;
+  height: 104px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  clip-path: polygon(
+    25% 0%,
+    75% 0%,
+    100% 50%,
+    75% 100%,
+    25% 100%,
+    0% 50%
+  );
+
+  background: linear-gradient(145deg, #3b0030, #7b0f68);
+  border: 1px solid rgba(216, 150, 255, 0.6);
+
+  color: white;
+  text-align: center;
+
+  box-shadow:
+    0 0 16px rgba(199, 125, 255, 0.35),
+    inset 0 0 18px rgba(255, 255, 255, 0.08);
+
+  transition: 0.25s ease;
+}
+
+.hex:hover {
+  transform: scale(1.08);
+  box-shadow:
+    0 0 26px rgba(199, 125, 255, 0.65),
+    inset 0 0 22px rgba(255, 255, 255, 0.12);
+}
+
+.hex span {
+  font-size: 1.7rem;
+  margin-bottom: 6px;
+}
+
+.hex p {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.center {
+  width: 160px;
+  height: 138px;
+  left: 180px;
+  top: 140px;
+  background: linear-gradient(145deg, #6f00ff, #9d4edd);
+}
+
+.steam {
+  left: 40px;
+  top: 40px;
+}
+
+.epic {
+  right: 40px;
+  top: 40px;
+}
+
+.achievements {
+  left: 0;
+  top: 170px;
+}
+
+.ranking {
+  right: 0;
+  top: 170px;
+}
+
+.stats {
+  left: 80px;
+  bottom: 20px;
+}
+
+.friends {
+  right: 80px;
+  bottom: 20px;
+}
