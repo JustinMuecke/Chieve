@@ -7,6 +7,7 @@ import httpx
 from src.models.errors import GitHubAPIError, OAuthCodeMissingError, OAuthStateError
 from src.services.auth_service import AuthService
 from src.services.postgres_service import PostgresService
+from src.services.s3_service import S3Service
 
 GITHUB_AUTH_URL = "https://github.com/login/oauth/authorize"
 GITHUB_TOKEN_URL = "https://github.com/login/oauth/access_token"
@@ -15,9 +16,10 @@ GITHUB_EMAILS_URL = "https://api.github.com/user/emails"
 
 
 class GithubOAuthService:
-    def __init__(self, auth: AuthService, postgres: PostgresService):
+    def __init__(self, auth: AuthService, postgres: PostgresService, s3: S3Service):
         self.auth = auth
         self.postgres = postgres
+        self.s3 = s3
         self.github_client_id = os.getenv("GITHUB_CLIENT_ID")
         self.github_client_secret = os.getenv("GITHUB_CLIENT_SECRET")
         self.frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
@@ -82,6 +84,7 @@ class GithubOAuthService:
                 profile = profile_response.json()
                 github_id = str(profile.get("id"))
                 username = profile.get("login")
+                github_avatar_url = profile.get("avatar_url")
 
                 email_response = await client.get(GITHUB_EMAILS_URL, headers=gh_headers)
                 email_response.raise_for_status()
@@ -98,6 +101,14 @@ class GithubOAuthService:
             username=username,
             email=primary_email,
         )
+
+        if github_avatar_url:
+            try:
+                key = self.s3.avatar_key(user.id, "github")
+                s3_url = await self.s3.copy_from_url(github_avatar_url, key)
+                await self.postgres.update_github_avatar(user.id, s3_url)
+            except Exception:
+                pass  # avatar copy is best-effort, never fail the login
 
         app_jwt = self.auth.create_token(user.id, user.username)
 

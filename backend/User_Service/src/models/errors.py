@@ -24,3 +24,11 @@ class TokenExpiredError(Exception):
 
 class TokenInvalidError(Exception):
     """JWT signature or structure is invalid."""
+
+
+class UserNotFoundError(Exception):
+    """Referenced user does not exist."""
+
+
+class SelfFollowError(Exception):
+    """User attempted to follow themselves."""

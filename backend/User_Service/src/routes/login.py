@@ -19,4 +19,5 @@ async def callback(request: Request, services=Depends(get_services), code: str =
     except OAuthCodeMissingError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except GitHubAPIError as e:
+
         raise HTTPException(status_code=502, detail=str(e))

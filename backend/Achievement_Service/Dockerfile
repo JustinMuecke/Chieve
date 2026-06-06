@@ -11,4 +11,4 @@ COPY src/ ./src/
 COPY alembic/ ./alembic/
 COPY alembic.ini .
 
-CMD alembic upgrade head && uvicorn src.main:app --host 0.0.0.0 --port 8000
+CMD alembic upgrade head && uvicorn src.main:app --host 0.0.0.0 --port 8001
