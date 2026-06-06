@@ -103,12 +103,13 @@ class GithubOAuthService:
         )
 
         if github_avatar_url:
+            await self.postgres.update_github_avatar(user.id, github_avatar_url)
             try:
                 key = self.s3.avatar_key(user.id, "github")
                 s3_url = await self.s3.copy_from_url(github_avatar_url, key)
                 await self.postgres.update_github_avatar(user.id, s3_url)
             except Exception:
-                pass  # avatar copy is best-effort, never fail the login
+                pass  # S3 copy is best-effort; CDN URL already saved above
 
         app_jwt = self.auth.create_token(user.id, user.username)
 

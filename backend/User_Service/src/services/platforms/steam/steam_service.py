@@ -98,12 +98,19 @@ class SteamService:
                 players = resp.json().get("response", {}).get("players", [])
                 if not players:
                     return
-                avatar_url = players[0].get("avatarfull")
-                if not avatar_url:
+                cdn_url = players[0].get("avatarfull")
+                if not cdn_url:
                     return
 
-            key = self.s3.avatar_key(user_id, "steam")
-            s3_url = await self.s3.copy_from_url(avatar_url, key)
-            await self.postgres.update_linked_account_avatar(user_id, "steam", s3_url)
+            # Try to cache in S3; fall back to Steam CDN URL
+            final_url = cdn_url
+            try:
+                key = self.s3.avatar_key(user_id, "steam")
+                final_url = await self.s3.copy_from_url(cdn_url, key)
+            except Exception:
+                pass
+
+            await self.postgres.update_linked_account_avatar(user_id, "steam", final_url)
+            await self.postgres.update_user_avatar(user_id, final_url)
         except Exception:
-            pass  # avatar copy is best-effort, never fail the link
+            pass  # avatar fetch is best-effort, never fail the link

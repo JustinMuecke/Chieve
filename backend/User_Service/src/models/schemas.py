@@ -12,6 +12,7 @@ class UserProfile(BaseModel):
     email: str | None
     avatar_url: str | None
     avatar_options: list[AvatarOption]
+    linked_platforms: list[str]
 
 
 class SelectAvatarRequest(BaseModel):

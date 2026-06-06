@@ -67,6 +67,36 @@ class PostgresService:
                 account.avatar_url = avatar_url
                 await session.commit()
 
+    async def delete_linked_account(self, user_id: int, platform: str) -> None:
+        async with self._session() as session:
+            result = await session.execute(
+                select(LinkedAccount).where(
+                    LinkedAccount.user_id == user_id,
+                    LinkedAccount.platform == platform,
+                )
+            )
+            account = result.scalar_one_or_none()
+            if not account:
+                return
+
+            platform_avatar = account.avatar_url
+
+            await session.execute(
+                delete(LinkedAccount).where(
+                    LinkedAccount.user_id == user_id,
+                    LinkedAccount.platform == platform,
+                )
+            )
+
+            # If the user's active avatar came from this platform, fall back to GitHub avatar
+            if platform_avatar:
+                user_result = await session.execute(select(User).where(User.id == user_id))
+                user = user_result.scalar_one_or_none()
+                if user and user.avatar_url == platform_avatar:
+                    user.avatar_url = user.github_avatar_url
+
+            await session.commit()
+
     async def link_platform(self, user_id: int, platform: str, platform_user_id: str) -> LinkedAccount:
         async with self._session() as session:
             result = await session.execute(

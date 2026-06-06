@@ -14,3 +14,13 @@ def get_current_user_id(request: Request, services=Depends(get_services)) -> int
         raise HTTPException(status_code=401, detail=str(e))
     except TokenInvalidError as e:
         raise HTTPException(status_code=401, detail=str(e))
+
+
+def get_optional_user_id(request: Request, services=Depends(get_services)) -> int | None:
+    token = request.cookies.get("auth_token")
+    if not token:
+        return None
+    try:
+        return services.auth.decode_token(token)
+    except (TokenExpiredError, TokenInvalidError):
+        return None

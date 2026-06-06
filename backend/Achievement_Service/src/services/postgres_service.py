@@ -51,6 +51,47 @@ class PostgresService:
             )
             return result.scalar_one_or_none()
 
+    async def get_all_games(
+        self, q: str | None, page: int, page_size: int
+    ) -> tuple[list[dict], int]:
+        offset = (page - 1) * page_size
+        async with self._session() as session:
+            if q:
+                count_result = await session.execute(
+                    text("SELECT COUNT(*) FROM games WHERE name ILIKE :q"),
+                    {"q": f"%{q}%"},
+                )
+                total = count_result.scalar_one()
+                result = await session.execute(
+                    text("""
+                        SELECT g.external_app_id, g.name, g.header_image_url,
+                               COUNT(a.id) AS total_achievements
+                        FROM games g
+                        LEFT JOIN achievements a ON a.game_id = g.id
+                        WHERE g.name ILIKE :q
+                        GROUP BY g.id
+                        ORDER BY g.name
+                        LIMIT :limit OFFSET :offset
+                    """),
+                    {"q": f"%{q}%", "limit": page_size, "offset": offset},
+                )
+            else:
+                count_result = await session.execute(text("SELECT COUNT(*) FROM games"))
+                total = count_result.scalar_one()
+                result = await session.execute(
+                    text("""
+                        SELECT g.external_app_id, g.name, g.header_image_url,
+                               COUNT(a.id) AS total_achievements
+                        FROM games g
+                        LEFT JOIN achievements a ON a.game_id = g.id
+                        GROUP BY g.id
+                        ORDER BY g.name
+                        LIMIT :limit OFFSET :offset
+                    """),
+                    {"limit": page_size, "offset": offset},
+                )
+            return [dict(row._mapping) for row in result], total
+
     async def get_user_games(self, user_id: int) -> list[dict]:
         async with self._session() as session:
             result = await session.execute(
@@ -77,7 +118,7 @@ class PostgresService:
             )
             return [dict(row._mapping) for row in result]
 
-    async def get_game_with_user_achievements(self, user_id: int, external_app_id: int) -> dict | None:
+    async def get_game_with_user_achievements(self, user_id: int | None, external_app_id: int) -> dict | None:
         async with self._session() as session:
             game_result = await session.execute(
                 select(Game).where(Game.external_app_id == external_app_id)
@@ -86,20 +127,34 @@ class PostgresService:
             if not game:
                 return None
 
-            result = await session.execute(
-                text("""
-                    SELECT
-                        a.id, a.api_name, a.display_name, a.description,
-                        a.icon_url, a.global_unlock_percent, a.global_points,
-                        ua.unlocked_at
-                    FROM achievements a
-                    LEFT JOIN user_achievements ua
-                        ON ua.achievement_id = a.id AND ua.user_id = :user_id
-                    WHERE a.game_id = :game_id
-                    ORDER BY a.global_unlock_percent ASC NULLS LAST
-                """),
-                {"user_id": user_id, "game_id": game.id},
-            )
+            if user_id is not None:
+                result = await session.execute(
+                    text("""
+                        SELECT
+                            a.id, a.api_name, a.display_name, a.description,
+                            a.icon_url, a.global_unlock_percent, a.global_points,
+                            ua.unlocked_at
+                        FROM achievements a
+                        LEFT JOIN user_achievements ua
+                            ON ua.achievement_id = a.id AND ua.user_id = :user_id
+                        WHERE a.game_id = :game_id
+                        ORDER BY a.global_unlock_percent ASC NULLS LAST
+                    """),
+                    {"user_id": user_id, "game_id": game.id},
+                )
+            else:
+                result = await session.execute(
+                    text("""
+                        SELECT
+                            a.id, a.api_name, a.display_name, a.description,
+                            a.icon_url, a.global_unlock_percent, a.global_points,
+                            NULL AS unlocked_at
+                        FROM achievements a
+                        WHERE a.game_id = :game_id
+                        ORDER BY a.global_unlock_percent ASC NULLS LAST
+                    """),
+                    {"game_id": game.id},
+                )
             achievements = [dict(row._mapping) for row in result]
             return {"game": game, "achievements": achievements}
 

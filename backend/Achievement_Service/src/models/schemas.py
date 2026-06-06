@@ -37,6 +37,13 @@ class AchievementDetail(BaseModel):
     unlocked_at: datetime | None
 
 
+class GameCatalogEntry(BaseModel):
+    app_id: int
+    name: str
+    header_image_url: str | None
+    total_achievements: int
+
+
 class GameSummary(BaseModel):
     app_id: int
     name: str

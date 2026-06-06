@@ -28,7 +28,17 @@ async def get_me(
         email=user.email,
         avatar_url=user.avatar_url,
         avatar_options=options,
+        linked_platforms=[a.platform for a in user.linked_accounts],
     )
+
+
+@router.delete("/platforms/{platform}", status_code=204)
+async def unlink_platform(
+    platform: str,
+    services=Depends(get_services),
+    user_id: int = Depends(get_current_user_id),
+):
+    await services.postgres.delete_linked_account(user_id, platform)
 
 
 @router.put("/avatar", status_code=204)
