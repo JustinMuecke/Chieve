@@ -1,13 +1,8 @@
-import { Link } from "react-router-dom";
 import style from "./profile.module.scss";
 
 import ProfileFeed from "../profileFeed/ProfileFeed";
 
 import { useState } from "react";
-
-
-
-
 
 type ProfileSection = "feed" | "guides" | "games";
 
@@ -19,6 +14,8 @@ type AchievementStats = {
   common: number;
   total: number;
 };
+
+type AchievementType = keyof AchievementStats;
 
 type ProfileData = {
   user_id: number;
@@ -33,28 +30,16 @@ type ProfileData = {
   achievements: AchievementStats;
 };
 
+type AchievementItem = {
+  key: AchievementType;
+  label: string;
+  value: number;
+  className: string;
+};
+
 function Profile() {
   const [activeSection, setActiveSection] = useState<ProfileSection>("feed");
 
-  /**
-   * TODO BACKEND:
-   * Diese Mock-Daten später durch den echten Profile-Endpoint ersetzen.
-   *
-   * Mögliche Logik:
-   *
-   * - Wenn /profile aufgerufen wird:
-   *   GET /me oder GET /profiles/me
-   *
-   * - Wenn /profile/:user_id aufgerufen wird:
-   *   GET /profiles/:user_id
-   *
-   * Der Endpoint sollte direkt liefern:
-   * - is_own_profile
-   * - is_following
-   * - followers_count
-   * - following_count
-   * - achievement counts nach Rarity
-   */
   const profile: ProfileData = {
     user_id: 42,
     username: "Xelaly",
@@ -79,33 +64,19 @@ function Profile() {
   function handleFollowClick() {
     /**
      * TODO BACKEND:
-     * Nur anzeigen/nutzen, wenn profile.is_own_profile === false.
-     *
-     * Wenn profile.is_following === false:
      * POST /social/follow/{profile.user_id}
-     *
-     * Wenn profile.is_following === true:
      * DELETE /social/follow/{profile.user_id}
-     *
-     * Danach Profile-Daten neu laden oder State lokal aktualisieren:
-     * - is_following togglen
-     * - followers_count +1 oder -1
      */
   }
 
   function handleEditClick() {
     /**
      * TODO:
-     * Nur anzeigen, wenn profile.is_own_profile === true.
-     *
-     * Optionen:
-     * - Modal öffnen
-     * - zu /profile/edit navigieren
-     * - Inline Edit für Banner, Avatar, Description
+     * Modal öffnen, zu /profile/edit navigieren oder Inline Edit starten.
      */
   }
 
-  const achievementItems = [
+  const achievementItems: AchievementItem[] = [
     {
       key: "perfect",
       label: "100%",
@@ -219,21 +190,23 @@ function Profile() {
         </section>
 
         <section className={style.achievementSection}>
-          <div className={style.sectionHeader}>
-            <p className={style.kicker}>Achievement Breakdown</p>
-            <h2>Collected trophies</h2>
-          </div>
 
           <div className={style.achievementRow}>
             {achievementItems.map((item) => (
               <article
                 key={item.key}
                 className={`${style.achievementItem} ${item.className}`}
+                tabIndex={0}
+                aria-label={`${item.value} ${item.label} achievements`}
               >
                 <div className={style.trophyIcon}>🏆</div>
-                <div>
-                  <strong>{item.value}</strong>
-                  <span>{item.label}</span>
+
+                <div className={style.achievementCountBadge}>
+                  {item.value}
+                </div>
+
+                <div className={style.achievementTooltip}>
+                  {item.label}
                 </div>
               </article>
             ))}
@@ -273,34 +246,23 @@ function Profile() {
         </div>
       </section>
 
-
-
-
       <section className={style.profileSectionContent}>
-        {activeSection === "feed" && (
-          <ProfileFeed userId={profile.user_id} />
-        )}
+        {activeSection === "feed" && <ProfileFeed userId={profile.user_id} />}
 
         {activeSection === "guides" && (
           <div className={style.placeholderPanel}>
             <h2>Guides</h2>
-            <p>
-              Here we will show guides written by this user.
-            </p>
+            <p>Here we will show guides written by this user.</p>
           </div>
         )}
 
         {activeSection === "games" && (
           <div className={style.placeholderPanel}>
             <h2>Games</h2>
-            <p>
-              Here we will show this user's tracked games.
-            </p>
+            <p>Here we will show this user's tracked games.</p>
           </div>
         )}
       </section>
-
-
     </main>
   );
 }

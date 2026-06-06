@@ -214,7 +214,6 @@
 
   font-size: 1.5rem;
 }
-
 .achievementRow {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -222,179 +221,196 @@
 }
 
 .achievementItem {
-  padding: 16px;
+  position: relative;
+
+  height: 128px;
+  min-width: 0;
 
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: 10px;
 
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.045);
   border: 1px solid rgba(255, 255, 255, 0.08);
+
+  cursor: default;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.achievementItem:hover,
+.achievementItem:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--badge-border);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 18px var(--badge-glow);
+  outline: none;
 }
 
 .trophyIcon {
-  width: 42px;
-  height: 42px;
+  width: 52px;
+  height: 52px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  border-radius: 14px;
+  border-radius: 16px;
+  background: var(--badge-bg);
+  color: var(--badge-color);
 
-  font-size: 1.35rem;
+  font-size: 1.55rem;
 }
 
-.achievementItem strong {
-  display: block;
-
-  font-size: 1.35rem;
-}
-
-.achievementItem span {
-  color: rgba(255, 255, 255, 0.58);
-  font-size: 0.78rem;
-}
-
-.perfect .trophyIcon {
-  background: rgba(199, 125, 255, 0.22);
-  color: #d8b4ff;
-}
-
-.legendary .trophyIcon {
-  background: rgba(249, 115, 22, 0.2);
-  color: #fb923c;
-}
-
-.rare .trophyIcon {
-  background: rgba(250, 204, 21, 0.2);
-  color: #facc15;
-}
-
-.uncommon .trophyIcon {
-  background: rgba(34, 197, 94, 0.2);
-  color: #4ade80;
-}
-
-.common .trophyIcon {
-  background: rgba(59, 130, 246, 0.2);
-  color: #60a5fa;
-}
-
-.total .trophyIcon {
-  background: rgba(255, 255, 255, 0.12);
-  color: white;
-}
-
-.profileNav {
-  padding: 0 32px 32px 32px;
-
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-@media (max-width: 1000px) {
-  .profileHead {
-    grid-template-columns: 1fr;
-    align-items: start;
-  }
-
-  .socialStats {
-    flex-wrap: wrap;
-  }
-
-  .achievementRow {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 620px) {
-  .profilePage {
-    padding: 28px 16px;
-  }
-
-  .banner {
-    height: 160px;
-  }
-
-  .profileHead,
-  .descriptionBox,
-  .achievementSection,
-  .profileNav {
-    margin-left: 18px;
-    margin-right: 18px;
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  .achievementRow {
-    grid-template-columns: 1fr;
-  }
-}
-
-
-.profileNav {
-  padding: 0 32px 24px 32px;
-
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.profileNavButton {
-  height: 36px;
-  padding: 0 14px;
+.achievementCountBadge {
+  min-width: 52px;
+  height: 28px;
+  padding: 0 10px;
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-
-  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: var(--badge-bg);
   color: white;
 
-  font-size: 0.95rem;
-  font-weight: 600;
-
-  cursor: pointer;
-  transition: 0.2s ease;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
-.profileNavButton:hover {
-  background: rgba(199, 125, 255, 0.35);
-  border-color: #c77dff;
-  transform: translateY(-2px);
+.achievementTooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+
+  padding: 7px 10px;
+
+  border-radius: 999px;
+  background: var(--badge-bg);
+  color: white;
+
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(6px);
+
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
 }
 
-.profileNavButtonActive {
-  background: rgba(199, 125, 255, 0.32);
-  border-color: rgba(199, 125, 255, 0.65);
-  box-shadow: 0 0 14px rgba(199, 125, 255, 0.25);
+.achievementTooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+
+  width: 8px;
+  height: 8px;
+
+  background: var(--badge-bg);
+  transform: translateX(-50%) rotate(45deg);
 }
 
-.profileSectionContent {
-  padding: 0 32px 32px 32px;
+.achievementItem:hover .achievementTooltip,
+.achievementItem:focus-visible .achievementTooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
-.placeholderPanel {
-  padding: 24px;
 
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(199, 125, 255, 0.16);
+
+.perfect {
+  --badge-bg: rgba(199, 125, 255, 0.28);
+  --badge-color: #d8b4ff;
+  --badge-border: rgba(199, 125, 255, 0.65);
+  --badge-glow: rgba(199, 125, 255, 0.28);
 }
 
-.placeholderPanel h2 {
-  margin: 0 0 8px 0;
+.legendary {
+  --badge-bg: rgba(249, 115, 22, 0.28);
+  --badge-color: #fb923c;
+  --badge-border: rgba(249, 115, 22, 0.6);
+  --badge-glow: rgba(249, 115, 22, 0.24);
 }
 
-.placeholderPanel p {
-  margin: 0;
+.rare {
+  --badge-bg: rgba(250, 204, 21, 0.26);
+  --badge-color: #facc15;
+  --badge-border: rgba(250, 204, 21, 0.58);
+  --badge-glow: rgba(250, 204, 21, 0.22);
+}
 
-  color: rgba(255, 255, 255, 0.62);
-  line-height: 1.6;
+.uncommon {
+  --badge-bg: rgba(34, 197, 94, 0.25);
+  --badge-color: #4ade80;
+  --badge-border: rgba(34, 197, 94, 0.58);
+  --badge-glow: rgba(34, 197, 94, 0.22);
+}
+
+.common {
+  --badge-bg: rgba(59, 130, 246, 0.26);
+  --badge-color: #60a5fa;
+  --badge-border: rgba(59, 130, 246, 0.58);
+  --badge-glow: rgba(59, 130, 246, 0.22);
+}
+
+.total {
+  --badge-bg: rgba(255, 255, 255, 0.16);
+  --badge-color: white;
+  --badge-border: rgba(255, 255, 255, 0.34);
+  --badge-glow: rgba(255, 255, 255, 0.14);
+}
+
+.achievementCountBadge {
+  min-width: 52px;
+  height: 28px;
+  padding: 0 10px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 999px;
+  background: var(--badge-bg);
+  color: white;
+
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.achievementTooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+
+  padding: 7px 10px;
+
+  border-radius: 999px;
+  background: var(--badge-bg);
+  color: white;
+
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(6px);
+
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
 }
