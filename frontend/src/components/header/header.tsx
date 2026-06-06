@@ -4,6 +4,8 @@ import logoImage from "../../assets/logoImg.png";
 import { useAuth } from "../../context/AuthContext";
 import style from "./header.module.scss";
 
+import HeaderSearch from "../searchBar/HeaderSearch";
+
 function ProfileDropdown() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -80,6 +82,7 @@ function Header() {
           title="Go back">
           ‹
         </button>
+        <HeaderSearch /> 
         <nav className={style.nav}>
           <Link to="/games">Games</Link>
           <Link to="/ranking">Ranking</Link>
