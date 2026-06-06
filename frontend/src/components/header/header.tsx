@@ -72,8 +72,13 @@ function Header() {
 
 
       <div className={style.rightArea}>
-        <button className={style.backButton} onClick={() => navigate(-1)}>
-          ←
+        <button
+          type="button"
+          className={style.backButton}
+          onClick={() => navigate(-1)}
+          aria-label="Go back"
+          title="Go back">
+          ‹
         </button>
         <nav className={style.nav}>
           <Link to="/games">Games</Link>

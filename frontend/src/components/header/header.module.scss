@@ -40,7 +40,7 @@
 .rightArea {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .nav {
@@ -185,32 +185,33 @@
 }
 
 .backButton {
-  width: 24px;
-  height: 24px;
+  width: 48px;
+  height: 48px;
+  padding: 0;
 
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
 
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 6px;
+  border-radius: 8px;
 
   background: rgba(255, 255, 255, 0.14);
   color: white;
 
-  font-size: 1.4rem;
-  font-weight: bold;
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1;
+  font-family: inherit;
   cursor: pointer;
-
   transition: 0.2s ease;
 }
 
 .backButton:hover {
-  background: #c77dff;
-  color: #250020;
-  transform: scale(1.08);
+  background: rgba(199, 125, 255, 0.28);
+  border-color: #c77dff;
+  transform: translateY(-2px);
 }
-
 
 .brandLink {
   display: flex;
