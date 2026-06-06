@@ -52,6 +52,17 @@ async def get_users_by_ids(
     return [UserSummary(id=u.id, username=u.username, avatar_url=u.avatar_url) for u in users]
 
 
+@router.get("/users/search", response_model=list[UserSummary])
+async def search_users(
+    q: str = Query(..., min_length=2),
+    limit: int = Query(5, ge=1, le=20),
+    services=Depends(get_services),
+    _service: str = Depends(get_calling_service),
+):
+    users = await services.postgres.search_users(q, limit)
+    return [UserSummary(id=u.id, username=u.username, avatar_url=u.avatar_url) for u in users]
+
+
 @router.get("/users/{user_id}/social-profile", response_model=FullUserProfile)
 async def get_user_social_profile(
     user_id: int,

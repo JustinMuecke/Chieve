@@ -14,8 +14,6 @@ from src.models.schemas import (
     FeedUserEntry,
     GameSummary,
     GuideResponse,
-    UserAchievementBreakdown,
-    UserFullProfile,
 )
 
 router = APIRouter(prefix="/users")
@@ -27,36 +25,6 @@ def _content_url(guide_id: int) -> str:
 
 def _header_url(guide_id: int) -> str:
     return f"/api/achievements/guides/{guide_id}/header"
-
-
-@router.get("/{user_id}/profile", response_model=UserFullProfile)
-async def get_user_profile(
-    user_id: int,
-    services=Depends(get_services),
-    viewer_id: int | None = Depends(get_optional_user_id),
-):
-    try:
-        user_data = await services.user_client.get_user_social_profile(user_id, viewer_id)
-    except UserServiceError as e:
-        raise HTTPException(status_code=502, detail=str(e))
-
-    if not user_data:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    breakdown = await services.postgres.get_user_achievement_breakdown(user_id)
-
-    return UserFullProfile(
-        user_id=user_data["id"],
-        username=user_data["username"],
-        avatar_url=user_data["avatar_url"],
-        banner_url=user_data["banner_url"],
-        description=user_data["description"],
-        followers_count=user_data["followers_count"],
-        following_count=user_data["following_count"],
-        is_own_profile=viewer_id == user_id if viewer_id is not None else False,
-        is_following=user_data["is_following"],
-        achievements=UserAchievementBreakdown(**breakdown),
-    )
 
 
 @router.get("/{user_id}/guides", response_model=list[GuideResponse])

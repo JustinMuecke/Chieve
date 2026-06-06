@@ -81,6 +81,7 @@ services:
       OAUTH_CALLBACK_URL: http://localhost:5173/api/user/auth/callback
       STEAM_CALLBACK_URL: http://localhost:5173/api/user/steam/callback
       STEAM_REALM: http://localhost:5173
+      ACHIEVEMENT_SERVICE_URL: http://achievement_service:8001
     ports:
       - "8000:8000"
     depends_on:

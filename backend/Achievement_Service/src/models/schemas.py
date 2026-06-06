@@ -131,6 +131,19 @@ class FeedResponse(BaseModel):
     entries: list[FeedUserEntry]
 
 
+# ── Global Search ─────────────────────────────────────────────────────────────
+
+class GameSearchResult(BaseModel):
+    app_id: int
+    name: str
+    header_image_url: str | None
+
+
+class GlobalSearchResponse(BaseModel):
+    games: list[GameSearchResult]
+    users: list[UserSummary]
+
+
 # ── Search ────────────────────────────────────────────────────────────────────
 
 class AchievementSearchResult(BaseModel):
@@ -181,19 +194,6 @@ class UserAchievementBreakdown(BaseModel):
     uncommon: int
     common: int
     total: int
-
-
-class UserFullProfile(BaseModel):
-    user_id: int
-    username: str
-    avatar_url: str | None
-    banner_url: str | None
-    description: str | None
-    followers_count: int
-    following_count: int
-    is_own_profile: bool
-    is_following: bool
-    achievements: UserAchievementBreakdown
 
 
 # ── Milestones ────────────────────────────────────────────────────────────────

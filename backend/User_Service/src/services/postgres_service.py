@@ -174,6 +174,16 @@ class PostgresService:
             )
             return list(result.scalars().all())
 
+    async def search_users(self, query: str, limit: int) -> list[User]:
+        async with self._session() as session:
+            result = await session.execute(
+                select(User)
+                .where(User.username.ilike(f"%{query}%"))
+                .order_by(User.username)
+                .limit(limit)
+            )
+            return list(result.scalars().all())
+
     async def get_user_social_stats(self, user_id: int, viewer_id: int | None) -> dict:
         async with self._session() as session:
             followers_result = await session.execute(

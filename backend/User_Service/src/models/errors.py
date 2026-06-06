@@ -32,3 +32,7 @@ class UserNotFoundError(Exception):
 
 class SelfFollowError(Exception):
     """User attempted to follow themselves."""
+
+
+class AchievementServiceError(Exception):
+    """Achievement Service returned an error or was unreachable."""

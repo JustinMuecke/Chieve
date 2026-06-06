@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from src.services.ServiceManager import ServiceManager
-from src.routes import sync, games, guides, profile, leaderboard, feed, search, milestones, users
+from src.routes import sync, games, guides, profile, leaderboard, feed, search, milestones, users, internal
 
 
 @asynccontextmanager
@@ -22,3 +22,4 @@ app.include_router(feed.router, prefix="/api/achievements")
 app.include_router(search.router, prefix="/api/achievements")
 app.include_router(milestones.router, prefix="/api/achievements")
 app.include_router(users.router, prefix="/api/achievements")
+app.include_router(internal.router)

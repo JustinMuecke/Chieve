@@ -29,6 +29,7 @@ function App() {
         <Routes>
           <Route path="/" element={<MainPage />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/:user_id" element={<Profile />} />
           <Route path="/games" element={<Games />} />
           <Route path="/games/:app_id" element={<GameDetail />} />
           <Route path="/ranking" element={<Ranglist />} />
