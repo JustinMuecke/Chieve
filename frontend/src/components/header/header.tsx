@@ -6,6 +6,7 @@ import style from "./header.module.scss";
 
 import HeaderSearch from "../searchBar/HeaderSearch";
 
+
 function ProfileDropdown() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -46,6 +47,9 @@ function ProfileDropdown() {
         <div className={style.dropdown}>
           <button className={style.dropdownItem} onClick={() => { navigate("/profile"); setOpen(false); }}>
             Visit Profile
+          </button>
+          <button className={style.dropdownItem} onClick={() => { navigate("/friends"); setOpen(false); }}>
+            Friends
           </button>
           <button className={style.dropdownItem} onClick={() => { navigate("/settings"); setOpen(false); }}>
             Settings

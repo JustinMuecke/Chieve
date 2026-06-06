@@ -13,6 +13,8 @@ import GameDetail from "./pages/GameDetailPage";
 import Ranglist from "./pages/RanglistPage";
 import Settings from "./pages/SettingsPage";
 
+import FriendsPage from "./pages/FriendsPage";
+
 function App() {
   const { data: user, isLoading, isError } = useMe();
 
@@ -31,6 +33,7 @@ function App() {
           <Route path="/games/:app_id" element={<GameDetail />} />
           <Route path="/ranking" element={<Ranglist />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/friends" element={<FriendsPage />} />
         </Routes>
 
         <Footer />
