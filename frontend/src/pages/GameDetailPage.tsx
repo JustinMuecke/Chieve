@@ -1,7 +1,11 @@
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useGameDetail } from '../api/games';
-import type { AchievementDetail } from '../api/types';
+import { useGameFeed } from '../api/feed';
+import type { AchievementDetail, FeedUserEntry } from '../api/types';
 import style from './gameDetail.module.scss';
+
+// ── Rarity helpers ────────────────────────────────────────────────────────────
 
 function rarityLabel(percent: number | null): string {
   if (percent === null) return '';
@@ -21,6 +25,8 @@ function rarityClass(percent: number | null): string {
   return style.common;
 }
 
+// ── Achievement row ───────────────────────────────────────────────────────────
+
 function AchievementRow({ a }: { a: AchievementDetail }) {
   return (
     <li className={`${style.achievementRow} ${a.unlocked ? style.unlockedRow : style.lockedRow}`}>
@@ -36,12 +42,14 @@ function AchievementRow({ a }: { a: AchievementDetail }) {
         {a.description && <span className={style.achievementDesc}>{a.description}</span>}
       </div>
       <div className={style.achievementMeta}>
-        {a.global_unlock_percent !== null && (
-          <span className={`${style.rarityBadge} ${rarityClass(a.global_unlock_percent)}`}>
-            {rarityLabel(a.global_unlock_percent)} · {a.global_unlock_percent.toFixed(1)}%
-          </span>
-        )}
-        <span className={style.pointsBadge}>{a.global_points} pts</span>
+        <span className={style.rarityLine}>
+          {a.global_unlock_percent !== null && (
+            <span className={`${style.rarityBadge} ${rarityClass(a.global_unlock_percent)}`}>
+              {rarityLabel(a.global_unlock_percent)}
+            </span>
+          )}
+          <span className={style.pointsBadge}>{a.global_points} pts</span>
+        </span>
         {a.unlocked_at && (
           <span className={style.unlockedDate}>
             {new Date(a.unlocked_at).toLocaleDateString()}
@@ -52,9 +60,81 @@ function AchievementRow({ a }: { a: AchievementDetail }) {
   );
 }
 
+// ── Friends feed tab ──────────────────────────────────────────────────────────
+
+function FeedTab({ appId }: { appId: string | undefined }) {
+  const { data, isLoading, isError } = useGameFeed(appId);
+
+  if (isLoading) return <div className={style.tabState}>Loading…</div>;
+  if (isError) return <div className={style.tabState}>Failed to load feed.</div>;
+  if (!data || data.entries.length === 0) {
+    return (
+      <div className={style.tabState}>
+        No friends have unlocked achievements in this game recently.
+      </div>
+    );
+  }
+
+  return (
+    <div className={style.feedList}>
+      {data.entries.map((entry: FeedUserEntry) => {
+        const gameEntry = entry.games[0];
+        if (!gameEntry) return null;
+        return (
+          <div key={entry.user_id} className={style.feedUserBlock}>
+            <div className={style.feedUserHeader}>
+              {entry.avatar_url ? (
+                <img src={entry.avatar_url} alt="" className={style.feedAvatar} />
+              ) : (
+                <div className={style.feedAvatarPlaceholder}>
+                  {entry.username[0]?.toUpperCase()}
+                </div>
+              )}
+              <span className={style.feedUsername}>{entry.username}</span>
+              <span className={style.feedCount}>
+                {gameEntry.achievements.length} achievement{gameEntry.achievements.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+            <ul className={style.feedAchievements}>
+              {gameEntry.achievements.map(a => (
+                <li key={a.api_name} className={style.feedAchievementRow}>
+                  {a.icon_url ? (
+                    <img src={a.icon_url} alt="" className={style.feedIcon} />
+                  ) : (
+                    <div className={style.feedIconPlaceholder} />
+                  )}
+                  <span className={style.feedAchName}>{a.display_name ?? a.api_name}</span>
+                  <span className={style.feedDate}>
+                    {new Date(a.unlocked_at).toLocaleDateString()}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Guides tab ────────────────────────────────────────────────────────────────
+
+function GuidesTab() {
+  return (
+    <div className={style.tabState}>
+      Guides are coming soon.
+    </div>
+  );
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
+
+type Tab = 'feed' | 'achievements' | 'guides';
+
 function GameDetailPage() {
   const { app_id } = useParams<{ app_id: string }>();
   const { data: game, isLoading, isError } = useGameDetail(app_id);
+  const [activeTab, setActiveTab] = useState<Tab>('achievements');
 
   if (isLoading) return <div className={style.state}>Loading game…</div>;
   if (isError || !game) return <div className={style.state}>Failed to load game.</div>;
@@ -103,27 +183,60 @@ function GameDetailPage() {
         </p>
       </div>
 
-      {unlocked.length > 0 && (
-        <section className={style.section}>
-          <h3 className={style.sectionTitle}>
-            Unlocked <span className={style.count}>{unlocked.length}</span>
-          </h3>
-          <ul className={style.list}>
-            {unlocked.map(a => <AchievementRow key={a.api_name} a={a} />)}
-          </ul>
-        </section>
-      )}
+      <div className={style.tabBar}>
+        <button
+          className={`${style.tabBtn} ${activeTab === 'feed' ? style.tabBtnActive : ''}`}
+          onClick={() => setActiveTab('feed')}
+        >
+          Friends Feed
+        </button>
+        <button
+          className={`${style.tabBtn} ${activeTab === 'achievements' ? style.tabBtnActive : ''}`}
+          onClick={() => setActiveTab('achievements')}
+        >
+          My Achievements
+        </button>
+        <button
+          className={`${style.tabBtn} ${activeTab === 'guides' ? style.tabBtnActive : ''}`}
+          onClick={() => setActiveTab('guides')}
+        >
+          Guides
+        </button>
+      </div>
 
-      {locked.length > 0 && (
-        <section className={style.section}>
-          <h3 className={style.sectionTitle}>
-            Locked <span className={style.count}>{locked.length}</span>
-          </h3>
-          <ul className={style.list}>
-            {locked.map(a => <AchievementRow key={a.api_name} a={a} />)}
-          </ul>
-        </section>
-      )}
+      <div className={style.tabContent}>
+        {activeTab === 'feed' && <FeedTab appId={app_id} />}
+
+        {activeTab === 'achievements' && (
+          <>
+            {unlocked.length > 0 && (
+              <section className={style.section}>
+                <h3 className={style.sectionTitle}>
+                  Unlocked <span className={style.count}>{unlocked.length}</span>
+                </h3>
+                <ul className={style.list}>
+                  {unlocked.map(a => <AchievementRow key={a.api_name} a={a} />)}
+                </ul>
+              </section>
+            )}
+            {locked.length > 0 && (
+              <section className={style.section}>
+                <h3 className={style.sectionTitle}>
+                  Locked <span className={style.count}>{locked.length}</span>
+                </h3>
+                <ul className={style.list}>
+                  {locked.map(a => <AchievementRow key={a.api_name} a={a} />)}
+                </ul>
+              </section>
+            )}
+            {unlocked.length === 0 && locked.length === 0 && (
+              <div className={style.tabState}>No achievements found for this game.</div>
+            )}
+          </>
+        )}
+
+        {activeTab === 'guides' && <GuidesTab />}
+      </div>
     </div>
   );
 }

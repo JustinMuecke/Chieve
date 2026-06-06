@@ -14,6 +14,7 @@ router = APIRouter(prefix="/feed")
 async def get_feed(
     days: int = Query(14, ge=1, le=90),
     limit_per_user: int | None = Query(None, ge=1, le=100),
+    app_id: int | None = Query(None),
     services=Depends(get_services),
     user_id: int = Depends(get_current_user_id),
 ):
@@ -35,6 +36,7 @@ async def get_feed(
         user_ids=following_ids,
         since=since,
         limit_per_user=limit_per_user,
+        app_id=app_id,
     )
 
     # Group rows: user_id → app_id → achievements
