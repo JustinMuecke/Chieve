@@ -64,8 +64,10 @@ function Header() {
   return (
     <header className={style.header}>
       <div className={style.brand}>
-        <img src={logoImage} alt="Website Logo" className={style.logo} />
-        <h1 className={style.title}>Chieve Collector</h1>
+        <Link to="/" className={style.brandLink}>
+          <img src={logoImage} alt="Website Logo" className={style.logo} />
+          <h1 className={style.title}>Chieve Collector</h1>
+        </Link>
       </div>
 
 
