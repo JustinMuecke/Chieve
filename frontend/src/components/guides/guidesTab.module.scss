@@ -43,24 +43,37 @@
 
 .createButton,
 .saveButton {
-  padding: 11px 18px;
+  height: 36px;
+  padding: 0 10px;
 
-  border: none;
-  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-  background: #c77dff;
-  color: #23001f;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 
-  font-weight: 900;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+
   cursor: pointer;
-
   transition: 0.2s ease;
 }
 
 .createButton:hover,
 .saveButton:hover {
+  background: rgba(199, 125, 255, 0.35);
+  border-color: #c77dff;
   transform: translateY(-2px);
-  box-shadow: 0 0 18px rgba(199, 125, 255, 0.42);
+}
+
+.saveButton {
+  background: rgba(199, 125, 255, 0.22);
+  border-color: rgba(199, 125, 255, 0.45);
 }
 
 .summaryGrid {
