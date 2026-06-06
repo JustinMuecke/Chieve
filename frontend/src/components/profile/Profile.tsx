@@ -1,34 +1,30 @@
-import style from "./profile.module.scss";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
+import style from "./profile.module.scss";
 import ProfileFeed from "../profileFeed/ProfileFeed";
 
-import { useState } from "react";
+import ProfileGuides from "../profileGuides/ProfileGuides";
+import ProfileGames from "../profileGames/ProfileGames";
+
+
+import {
+  followUser,
+  getUserProfile,
+  unfollowUser,
+  type UserProfile,
+  type AchievementStats,
+} from "../../api/userProfile";
+
+
+
+
+
+
+
 
 type ProfileSection = "feed" | "guides" | "games";
-
-type AchievementStats = {
-  perfect: number;
-  legendary: number;
-  rare: number;
-  uncommon: number;
-  common: number;
-  total: number;
-};
-
 type AchievementType = keyof AchievementStats;
-
-type ProfileData = {
-  user_id: number;
-  username: string;
-  avatar_url: string | null;
-  banner_url: string | null;
-  description: string | null;
-  followers_count: number;
-  following_count: number;
-  is_own_profile: boolean;
-  is_following: boolean;
-  achievements: AchievementStats;
-};
 
 type AchievementItem = {
   key: AchievementType;
@@ -38,42 +34,118 @@ type AchievementItem = {
 };
 
 function Profile() {
+  const { user_id } = useParams<{ user_id: string }>();
+
+  /**
+   * TODO:
+   * Für /profile ohne user_id braucht ihr eigentlich die eigene User-ID.
+   * Sauber wäre:
+   * - entweder Header/Profile-Link direkt auf /profile/{ownUserId}
+   * - oder separater Endpoint GET /api/me, um eigene ID zu holen.
+   *
+   * Fallback "1" ist nur für Entwicklung.
+   */
+  const resolvedUserId = user_id ?? "1";
+
   const [activeSection, setActiveSection] = useState<ProfileSection>("feed");
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
 
-  const profile: ProfileData = {
-    user_id: 42,
-    username: "Xelaly",
-    avatar_url: null,
-    banner_url: null,
-    description:
-      "Achievement hunter, backlog survivor, and occasional completionist. Currently trying to turn unfinished games into measurable regret.",
-    followers_count: 128,
-    following_count: 64,
-    is_own_profile: true,
-    is_following: false,
-    achievements: {
-      perfect: 7,
-      legendary: 13,
-      rare: 48,
-      uncommon: 156,
-      common: 312,
-      total: 536,
-    },
-  };
+  useEffect(() => {
+    let isMounted = true;
 
-  function handleFollowClick() {
+    async function loadProfile() {
+      setIsLoadingProfile(true);
+      setProfileError(null);
+
+      try {
+        /**
+         * BACKEND:
+         * Lädt das angezeigte Profil anhand der URL:
+         * /profile/:user_id
+         */
+        const loadedProfile = await getUserProfile(resolvedUserId);
+
+        if (isMounted) {
+          setProfile(loadedProfile);
+        }
+      } catch (error) {
+        console.error(error);
+
+        if (isMounted) {
+          setProfileError("Could not load profile.");
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingProfile(false);
+        }
+      }
+    }
+
+    loadProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [resolvedUserId]);
+
+  async function handleFollowClick() {
+    if (!profile || profile.is_own_profile) return;
+
+    const wasFollowing = profile.is_following;
+
     /**
-     * TODO BACKEND:
-     * POST /social/follow/{profile.user_id}
-     * DELETE /social/follow/{profile.user_id}
+     * Optimistic UI:
+     * Button und Follower-Zahl ändern sich sofort.
+     * Falls Backend fehlschlägt, rollen wir zurück.
      */
+    setProfile({
+      ...profile,
+      is_following: !wasFollowing,
+      followers_count: wasFollowing
+        ? profile.followers_count - 1
+        : profile.followers_count + 1,
+    });
+
+    try {
+      if (wasFollowing) {
+        await unfollowUser(profile.user_id);
+      } else {
+        await followUser(profile.user_id);
+      }
+    } catch (error) {
+      console.error(error);
+
+      /**
+       * Rollback.
+       */
+      setProfile(profile);
+      setProfileError("Follow action failed.");
+    }
   }
 
   function handleEditClick() {
     /**
      * TODO:
-     * Modal öffnen, zu /profile/edit navigieren oder Inline Edit starten.
+     * Nur eigenes Profil:
+     * - Edit Modal öffnen
+     * - oder zu /profile/edit navigieren
+     * - Banner, Avatar, Description bearbeiten
      */
+    console.log("Edit profile clicked");
+  }
+
+  if (isLoadingProfile) {
+    return <main className={style.profilePage}>Loading profile…</main>;
+  }
+
+  if (profileError || !profile) {
+    return (
+      <main className={style.profilePage}>
+        {profileError ?? "Profile not found."}
+      </main>
+    );
   }
 
   const achievementItems: AchievementItem[] = [
@@ -117,6 +189,7 @@ function Profile() {
 
   return (
     <main className={style.profilePage}>
+    
       <section className={style.profileCard}>
         <div
           className={style.banner}
@@ -249,22 +322,14 @@ function Profile() {
       <section className={style.profileSectionContent}>
         {activeSection === "feed" && <ProfileFeed userId={profile.user_id} />}
 
-        {activeSection === "guides" && (
-          <div className={style.placeholderPanel}>
-            <h2>Guides</h2>
-            <p>Here we will show guides written by this user.</p>
-          </div>
-        )}
+        {activeSection === "guides" && <ProfileGuides userId={profile.user_id} />}
 
-        {activeSection === "games" && (
-          <div className={style.placeholderPanel}>
-            <h2>Games</h2>
-            <p>Here we will show this user's tracked games.</p>
-          </div>
-        )}
+        {activeSection === "games" && <ProfileGames userId={profile.user_id} />}
       </section>
     </main>
   );
 }
 
 export default Profile;
+
+
