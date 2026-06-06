@@ -1,12 +1,265 @@
-.ranglistContainer{
-    background-color: rgb(12, 12, 12);
-    color: rgb(234, 201, 242);
-    text-align: left;
-    padding: 30px 0;
-    font-size: 14px;
+.container {
+  padding: 32px;
+  max-width: 860px;
+  margin: 0 auto;
 }
 
-.ranglistTable {
-    width: 80%;
-    border-collapse: collapse;
+// ── Controls ─────────────────────────────────────────────────────────────────
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.tabs {
+  display: flex;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.tab {
+  padding: 7px 20px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+
+  &:hover:not(.tabActive) {
+    background: var(--accent-bg);
+    color: var(--accent);
+  }
+}
+
+.tabActive {
+  background: var(--accent);
+  color: #fff;
+}
+
+.scopeToggle {
+  display: flex;
+  gap: 4px;
+}
+
+.scopeBtn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+
+  &:hover:not(.scopeActive) {
+    border-color: var(--accent-border);
+    color: var(--accent);
+  }
+}
+
+.scopeActive {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.scoreLabel {
+  font-size: 0.78rem;
+  color: var(--text);
+  margin: 0 0 20px;
+  text-align: left;
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+
+.state {
+  padding: 48px 32px;
+  color: var(--text);
+  text-align: center;
+  font-size: 1rem;
+}
+
+// ── List ──────────────────────────────────────────────────────────────────────
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--code-bg);
+  transition: border-color 0.15s ease;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+}
+
+.selfRow {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.top1 {
+  border-color: rgba(251, 191, 36, 0.5);
+  background: rgba(251, 191, 36, 0.06);
+}
+
+.top2 {
+  border-color: rgba(156, 163, 175, 0.5);
+  background: rgba(156, 163, 175, 0.06);
+}
+
+.top3 {
+  border-color: rgba(180, 120, 60, 0.5);
+  background: rgba(180, 120, 60, 0.06);
+}
+
+// ── Rank ──────────────────────────────────────────────────────────────────────
+
+.rank {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.rankNum {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+// ── User ──────────────────────────────────────────────────────────────────────
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.avatarPlaceholder {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.username {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-h);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.youBadge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+  flex-shrink: 0;
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+
+.stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.score {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.achievementCount {
+  font-size: 0.72rem;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+// ── Pagination ────────────────────────────────────────────────────────────────
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.pageBtn {
+  padding: 6px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+
+  &:hover:not(:disabled) {
+    border-color: var(--accent-border);
+    color: var(--accent);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+}
+
+.pageInfo {
+  font-size: 0.82rem;
+  color: var(--text);
 }

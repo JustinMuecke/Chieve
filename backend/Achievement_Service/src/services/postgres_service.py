@@ -358,14 +358,16 @@ class PostgresService:
     # ── Feed ──────────────────────────────────────────────────────────────────
 
     async def get_feed_entries(
-        self, user_ids: list[int], since: datetime, limit_per_user: int | None
+        self, user_ids: list[int], since: datetime, limit_per_user: int | None,
+        app_id: int | None = None,
     ) -> list[dict]:
         if not user_ids:
             return []
+        game_filter = "AND g.external_app_id = :app_id" if app_id is not None else ""
         async with self._session() as session:
             if limit_per_user:
                 result = await session.execute(
-                    text("""
+                    text(f"""
                         SELECT ua.user_id, g.external_app_id, g.name AS game_name,
                                g.header_image_url, a.api_name, a.display_name,
                                a.icon_url, a.global_points, ua.unlocked_at
@@ -378,24 +380,26 @@ class PostgresService:
                         ) ua
                         JOIN achievements a ON a.id = ua.achievement_id
                         JOIN games g ON g.id = a.game_id
-                        WHERE ua.rn <= :limit_per_user
+                        WHERE ua.rn <= :limit_per_user {game_filter}
                         ORDER BY ua.user_id, g.id, ua.unlocked_at DESC
                     """),
-                    {"user_ids": user_ids, "since": since, "limit_per_user": limit_per_user},
+                    {"user_ids": user_ids, "since": since, "limit_per_user": limit_per_user,
+                     **( {"app_id": app_id} if app_id is not None else {})},
                 )
             else:
                 result = await session.execute(
-                    text("""
+                    text(f"""
                         SELECT ua.user_id, g.external_app_id, g.name AS game_name,
                                g.header_image_url, a.api_name, a.display_name,
                                a.icon_url, a.global_points, ua.unlocked_at
                         FROM user_achievements ua
                         JOIN achievements a ON a.id = ua.achievement_id
                         JOIN games g ON g.id = a.game_id
-                        WHERE ua.user_id = ANY(:user_ids) AND ua.unlocked_at >= :since
+                        WHERE ua.user_id = ANY(:user_ids) AND ua.unlocked_at >= :since {game_filter}
                         ORDER BY ua.user_id, g.id, ua.unlocked_at DESC
                     """),
-                    {"user_ids": user_ids, "since": since},
+                    {"user_ids": user_ids, "since": since,
+                     **( {"app_id": app_id} if app_id is not None else {})},
                 )
             return [dict(row._mapping) for row in result]
 
