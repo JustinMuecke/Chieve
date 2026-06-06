@@ -28,3 +28,11 @@ class GameNotFoundError(Exception):
 
 class UserServiceError(Exception):
     """Call to User Service internal API failed."""
+
+
+class GuideNotFoundError(Exception):
+    """Requested guide does not exist."""
+
+
+class GuideForbiddenError(Exception):
+    """User does not own this guide."""

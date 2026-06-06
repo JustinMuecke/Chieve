@@ -1,16 +1,19 @@
 from datetime import datetime, timezone
 
 from sqlalchemy import func, select, text
+from sqlalchemy.orm import selectinload
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from src.models.achievement import (
     Achievement,
     Game,
+    Guide,
     UserAchievement,
     UserMilestone,
     UserProfileStats,
 )
+from src.models.errors import GuideForbiddenError, GuideNotFoundError
 
 
 class PostgresService:
@@ -492,3 +495,58 @@ class PostgresService:
                 )
             )
             return result.scalar_one() > 0
+
+    # ── Guides ────────────────────────────────────────────────────────────────
+
+    async def create_guide(
+        self, user_id: int, external_app_id: int, title: str, s3_key: str
+    ) -> Guide:
+        async with self._session() as session:
+            game_result = await session.execute(
+                select(Game).where(Game.external_app_id == external_app_id)
+            )
+            game = game_result.scalar_one_or_none()
+            if not game:
+                from src.models.errors import GameNotFoundError
+                raise GameNotFoundError(f"Game {external_app_id} not found")
+            guide = Guide(user_id=user_id, game_id=game.id, title=title, s3_key=s3_key)
+            session.add(guide)
+            await session.commit()
+            result = await session.execute(
+                select(Guide).options(selectinload(Guide.game)).where(Guide.id == guide.id)
+            )
+            return result.scalar_one()
+
+    async def update_guide(
+        self, guide_id: int, user_id: int, title: str | None
+    ) -> Guide:
+        async with self._session() as session:
+            result = await session.execute(
+                select(Guide).options(selectinload(Guide.game)).where(Guide.id == guide_id)
+            )
+            guide = result.scalar_one_or_none()
+            if not guide:
+                raise GuideNotFoundError(f"Guide {guide_id} not found")
+            if guide.user_id != user_id:
+                raise GuideForbiddenError("You do not own this guide")
+            if title is not None:
+                guide.title = title
+            guide.updated_at = datetime.now(timezone.utc)
+            await session.commit()
+            return guide
+
+    async def get_guides_for_game(self, external_app_id: int) -> list[dict]:
+        async with self._session() as session:
+            result = await session.execute(
+                text("""
+                    SELECT gu.id, gu.user_id, gu.title, gu.s3_key,
+                           gu.created_at, gu.updated_at,
+                           g.external_app_id AS app_id, g.name AS game_name
+                    FROM guides gu
+                    JOIN games g ON g.id = gu.game_id
+                    WHERE g.external_app_id = :app_id
+                    ORDER BY gu.created_at DESC
+                """),
+                {"app_id": external_app_id},
+            )
+            return [dict(row._mapping) for row in result]

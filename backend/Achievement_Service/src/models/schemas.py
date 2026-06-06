@@ -135,6 +135,27 @@ class AchievementSearchResult(BaseModel):
     game_name: str
 
 
+# ── Guides ────────────────────────────────────────────────────────────────────
+
+class GuideResponse(BaseModel):
+    id: int
+    user_id: int
+    username: str | None
+    app_id: int
+    game_name: str
+    title: str
+    content_url: str
+    created_at: datetime
+    updated_at: datetime
+
+
+class GameGuidesResponse(BaseModel):
+    app_id: int
+    game_name: str
+    my_guides: list[GuideResponse]
+    other_guides: list[GuideResponse]
+
+
 # ── Milestones ────────────────────────────────────────────────────────────────
 
 class MilestoneEntry(BaseModel):

@@ -13,4 +13,5 @@ dependencies = [
     "alembic",
     "celery[redis]",
     "redis[hiredis]",
+    "aioboto3",
 ]

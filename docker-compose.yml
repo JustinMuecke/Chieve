@@ -54,9 +54,11 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     entrypoint: >
       /bin/sh -c "
-      /usr/bin/mc config host add local http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD;
+      /usr/bin/mc alias set local http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD;
       /usr/bin/mc mb -p local/avatars;
       /usr/bin/mc anonymous set public local/avatars;
+      /usr/bin/mc mb -p local/guides;
+      /usr/bin/mc anonymous set public local/guides;
       exit 0;
       "
 
@@ -104,6 +106,10 @@ services:
       REDIS_URL: redis://redis:6379/0
       USER_SERVICE_URL: http://user_service:8000
       STEAM_API_KEY: ${STEAM_API_KEY}
+      S3_URL: http://minio:9000
+      S3_PUBLIC_URL: http://localhost:9000
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
     ports:
       - "8001:8001"
     depends_on:
@@ -111,6 +117,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
 
   celery_worker:
     build:
