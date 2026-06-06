@@ -145,6 +145,7 @@ class GuideResponse(BaseModel):
     game_name: str
     title: str
     content_url: str
+    is_favorite: bool = False
     created_at: datetime
     updated_at: datetime
 

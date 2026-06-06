@@ -101,3 +101,20 @@ class Guide(Base):
     )
 
     game: Mapped["Game"] = relationship()
+    favorites: Mapped[list["GuideFavorite"]] = relationship(
+        back_populates="guide", cascade="all, delete-orphan"
+    )
+
+
+class GuideFavorite(Base):
+    __tablename__ = "guide_favorites"
+
+    user_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    guide_id: Mapped[int] = mapped_column(
+        ForeignKey("guides.id", ondelete="CASCADE"), primary_key=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    guide: Mapped["Guide"] = relationship(back_populates="favorites")

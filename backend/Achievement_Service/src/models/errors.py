@@ -36,3 +36,11 @@ class GuideNotFoundError(Exception):
 
 class GuideForbiddenError(Exception):
     """User does not own this guide."""
+
+
+class GuideFavoriteAlreadyExistsError(Exception):
+    """User has already favorited this guide."""
+
+
+class GuideFavoriteNotFoundError(Exception):
+    """User has not favorited this guide."""
