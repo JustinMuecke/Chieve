@@ -30,8 +30,24 @@ class S3Service:
         async with self._client() as s3:
             await s3.delete_object(Bucket=self.BUCKET, Key=key)
 
-    def get_url(self, key: str) -> str:
-        return f"{self._public_url}/{self.BUCKET}/{key}"
+    async def upload_header_image(self, key: str, content: bytes, content_type: str) -> None:
+        async with self._client() as s3:
+            await s3.put_object(
+                Bucket=self.BUCKET,
+                Key=key,
+                Body=content,
+                ContentType=content_type,
+            )
+
+    async def get_object(self, key: str) -> tuple[bytes, str]:
+        async with self._client() as s3:
+            response = await s3.get_object(Bucket=self.BUCKET, Key=key)
+            body = await response["Body"].read()
+            content_type = response.get("ContentType", "application/octet-stream")
+            return body, content_type
 
     def guide_key(self, user_id: int, guide_id: str) -> str:
         return f"{user_id}/{guide_id}.md"
+
+    def header_image_key(self, user_id: int, guide_id: str) -> str:
+        return f"{user_id}/{guide_id}_header"

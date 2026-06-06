@@ -412,6 +412,36 @@ class PostgresService:
                 )
             return [dict(row._mapping) for row in result]
 
+    async def get_guide_by_id(self, guide_id: int) -> Guide:
+        async with self._session() as session:
+            result = await session.execute(select(Guide).where(Guide.id == guide_id))
+            guide = result.scalar_one_or_none()
+            if not guide:
+                raise GuideNotFoundError(f"Guide {guide_id} not found")
+            return guide
+
+    async def get_feed_guides(
+        self, user_ids: list[int], since: datetime, app_id: int | None = None
+    ) -> list[dict]:
+        if not user_ids:
+            return []
+        game_filter = "AND g.external_app_id = :app_id" if app_id is not None else ""
+        async with self._session() as session:
+            result = await session.execute(
+                text(f"""
+                    SELECT gu.id, gu.user_id, gu.title, gu.description, gu.created_at,
+                           g.external_app_id AS app_id, g.name AS game_name
+                    FROM guides gu
+                    JOIN games g ON g.id = gu.game_id
+                    WHERE gu.user_id = ANY(:user_ids) AND gu.created_at >= :since
+                    {game_filter}
+                    ORDER BY gu.created_at DESC
+                """),
+                {"user_ids": user_ids, "since": since,
+                 **( {"app_id": app_id} if app_id is not None else {})},
+            )
+            return [dict(row._mapping) for row in result]
+
     # ── Search ────────────────────────────────────────────────────────────────
 
     async def search_achievements(
@@ -505,7 +535,13 @@ class PostgresService:
     # ── Guides ────────────────────────────────────────────────────────────────
 
     async def create_guide(
-        self, user_id: int, external_app_id: int, title: str, s3_key: str
+        self,
+        user_id: int,
+        external_app_id: int,
+        title: str,
+        s3_key: str,
+        description: str | None = None,
+        header_image_s3_key: str | None = None,
     ) -> Guide:
         async with self._session() as session:
             game_result = await session.execute(
@@ -515,7 +551,14 @@ class PostgresService:
             if not game:
                 from src.models.errors import GameNotFoundError
                 raise GameNotFoundError(f"Game {external_app_id} not found")
-            guide = Guide(user_id=user_id, game_id=game.id, title=title, s3_key=s3_key)
+            guide = Guide(
+                user_id=user_id,
+                game_id=game.id,
+                title=title,
+                description=description,
+                s3_key=s3_key,
+                header_image_s3_key=header_image_s3_key,
+            )
             session.add(guide)
             await session.commit()
             result = await session.execute(
@@ -524,7 +567,12 @@ class PostgresService:
             return result.scalar_one()
 
     async def update_guide(
-        self, guide_id: int, user_id: int, title: str | None
+        self,
+        guide_id: int,
+        user_id: int,
+        title: str | None = None,
+        description: str | None = None,
+        header_image_s3_key: str | None = None,
     ) -> Guide:
         async with self._session() as session:
             result = await session.execute(
@@ -537,6 +585,10 @@ class PostgresService:
                 raise GuideForbiddenError("You do not own this guide")
             if title is not None:
                 guide.title = title
+            if description is not None:
+                guide.description = description
+            if header_image_s3_key is not None:
+                guide.header_image_s3_key = header_image_s3_key
             guide.updated_at = datetime.now(timezone.utc)
             await session.commit()
             return guide
@@ -547,10 +599,23 @@ class PostgresService:
         async with self._session() as session:
             result = await session.execute(
                 text("""
-                    SELECT gu.id, gu.user_id, gu.title, gu.s3_key,
+                    SELECT gu.id, gu.user_id, gu.title, gu.description,
+                           gu.s3_key, gu.header_image_s3_key,
                            gu.created_at, gu.updated_at,
                            g.external_app_id AS app_id, g.name AS game_name,
-                           (gf.guide_id IS NOT NULL) AS is_favorite
+                           (gf.guide_id IS NOT NULL) AS is_favorite,
+                           (
+                               SELECT COUNT(*)
+                               FROM user_achievements ua
+                               JOIN achievements a ON a.id = ua.achievement_id
+                               WHERE ua.user_id = gu.user_id
+                                 AND a.game_id = gu.game_id
+                           ) AS author_achievement_count,
+                           (
+                               SELECT COUNT(*)
+                               FROM achievements a2
+                               WHERE a2.game_id = gu.game_id
+                           ) AS game_total_achievements
                     FROM guides gu
                     JOIN games g ON g.id = gu.game_id
                     LEFT JOIN guide_favorites gf

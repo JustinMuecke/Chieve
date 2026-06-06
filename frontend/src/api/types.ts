@@ -74,11 +74,21 @@ export interface FeedGame {
   achievements: FeedAchievement[];
 }
 
+export interface FeedGuide {
+  guide_id: number;
+  title: string;
+  description: string | null;
+  game_name: string;
+  app_id: number;
+  published_at: string;
+}
+
 export interface FeedUserEntry {
   user_id: number;
   username: string;
   avatar_url: string | null;
   games: FeedGame[];
+  guides: FeedGuide[];
 }
 
 export interface FeedResponse {
@@ -86,6 +96,35 @@ export interface FeedResponse {
   days: number;
   entries: FeedUserEntry[];
 }
+
+// ── Guides ────────────────────────────────────────────────────────────────────
+
+export interface GuideResponse {
+  id: number;
+  user_id: number;
+  username: string | null;
+  app_id: number;
+  game_name: string;
+  title: string;
+  content_url: string;
+  description: string | null;
+  header_image_url: string | null;
+  author_avatar_url: string | null;
+  is_favorite: boolean;
+  author_achievement_count: number;
+  game_total_achievements: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GameGuidesResponse {
+  app_id: number;
+  game_name: string;
+  my_guides: GuideResponse[];
+  other_guides: GuideResponse[];
+}
+
+export type GuideWithOwner = GuideResponse & { isOwn: boolean };
 
 // ── Leaderboard ───────────────────────────────────────────────────────────────
 

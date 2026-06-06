@@ -63,7 +63,8 @@ async def select_avatar(
         await services.postgres.update_user_avatar(user_id, steam.avatar_url)
 
     elif body.source == "custom":
-        url = services.s3.get_url(services.s3.avatar_key(user_id, "custom"))
+        key = services.s3.avatar_key(user_id, "custom")
+        url = services.s3.avatar_proxy_url(key)
         await services.postgres.update_user_avatar(user_id, url)
 
     else:

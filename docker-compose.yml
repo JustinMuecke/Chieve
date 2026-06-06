@@ -56,9 +56,7 @@ services:
       /bin/sh -c "
       /usr/bin/mc alias set local http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD;
       /usr/bin/mc mb -p local/avatars;
-      /usr/bin/mc anonymous set public local/avatars;
       /usr/bin/mc mb -p local/guides;
-      /usr/bin/mc anonymous set public local/guides;
       exit 0;
       "
 

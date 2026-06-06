@@ -108,11 +108,21 @@ class FeedGame(BaseModel):
     achievements: list[FeedAchievement]
 
 
+class FeedGuide(BaseModel):
+    guide_id: int
+    title: str
+    description: str | None
+    game_name: str
+    app_id: int
+    published_at: datetime
+
+
 class FeedUserEntry(BaseModel):
     user_id: int
     username: str
     avatar_url: str | None
     games: list[FeedGame]
+    guides: list[FeedGuide] = []
 
 
 class FeedResponse(BaseModel):
@@ -141,11 +151,16 @@ class GuideResponse(BaseModel):
     id: int
     user_id: int
     username: str | None
+    author_avatar_url: str | None = None
     app_id: int
     game_name: str
     title: str
+    description: str | None = None
     content_url: str
+    header_image_url: str | None = None
     is_favorite: bool = False
+    author_achievement_count: int = 0
+    game_total_achievements: int = 0
     created_at: datetime
     updated_at: datetime
 

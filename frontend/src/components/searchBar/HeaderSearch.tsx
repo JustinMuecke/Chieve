@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import style from "./headerSearch.module.scss";
+import style from "./HeaderSearch.module.scss";
 
 type GameSearchResult = {
   type: "game";

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useGameFeed } from "../../api/feed";
-import type { AchievementDetail, FeedUserEntry } from "../../api/types";
+import type { AchievementDetail, FeedUserEntry, FeedGuide } from "../../api/types";
 import style from "./gamesDetails.module.scss";
 
 import GuidesTab from "../guides/GuidesTab";
@@ -101,7 +101,7 @@ function FeedTab({ appId }: { appId: string | undefined }) {
   if (!data || data.entries.length === 0) {
     return (
       <div className={style.tabState}>
-        No friends have unlocked achievements in this game recently.
+        No friends have had activity in this game recently.
       </div>
     );
   }
@@ -109,8 +109,10 @@ function FeedTab({ appId }: { appId: string | undefined }) {
   return (
     <div className={style.feedList}>
       {data.entries.map((entry: FeedUserEntry) => {
-        const gameEntry = entry.games[0];
-        if (!gameEntry) return null;
+        const totalAch = entry.games.reduce((n, g) => n + g.achievements.length, 0);
+        const activityParts = [];
+        if (totalAch > 0) activityParts.push(`${totalAch} achievement${totalAch !== 1 ? "s" : ""}`);
+        if (entry.guides.length > 0) activityParts.push(`${entry.guides.length} guide${entry.guides.length !== 1 ? "s" : ""}`);
 
         return (
           <div key={entry.user_id} className={style.feedUserBlock}>
@@ -125,31 +127,44 @@ function FeedTab({ appId }: { appId: string | undefined }) {
 
               <span className={style.feedUsername}>{entry.username}</span>
 
-              <span className={style.feedCount}>
-                {gameEntry.achievements.length} achievement
-                {gameEntry.achievements.length !== 1 ? "s" : ""}
-              </span>
+              <span className={style.feedCount}>{activityParts.join(", ")}</span>
             </div>
 
-            <ul className={style.feedAchievements}>
-              {gameEntry.achievements.map((a) => (
-                <li key={a.api_name} className={style.feedAchievementRow}>
-                  {a.icon_url ? (
-                    <img src={a.icon_url} alt="" className={style.feedIcon} />
-                  ) : (
-                    <div className={style.feedIconPlaceholder} />
-                  )}
+            {entry.games.map((gameEntry) => (
+              <ul key={gameEntry.app_id} className={style.feedAchievements}>
+                {gameEntry.achievements.map((a) => (
+                  <li key={a.api_name} className={style.feedAchievementRow}>
+                    {a.icon_url ? (
+                      <img src={a.icon_url} alt="" className={style.feedIcon} />
+                    ) : (
+                      <div className={style.feedIconPlaceholder} />
+                    )}
 
-                  <span className={style.feedAchName}>
-                    {a.display_name ?? a.api_name}
-                  </span>
+                    <span className={style.feedAchName}>
+                      {a.display_name ?? a.api_name}
+                    </span>
 
-                  <span className={style.feedDate}>
-                    {new Date(a.unlocked_at).toLocaleDateString()}
-                  </span>
-                </li>
-              ))}
-            </ul>
+                    <span className={style.feedDate}>
+                      {new Date(a.unlocked_at).toLocaleDateString()}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ))}
+
+            {entry.guides.length > 0 && (
+              <ul className={style.feedGuides}>
+                {entry.guides.map((g: FeedGuide) => (
+                  <li key={g.guide_id} className={style.feedGuideRow}>
+                    <span className={style.feedGuideBadge}>Guide</span>
+                    <span className={style.feedAchName}>{g.title}</span>
+                    <span className={style.feedDate}>
+                      {new Date(g.published_at).toLocaleDateString()}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         );
       })}

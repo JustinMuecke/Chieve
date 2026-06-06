@@ -30,7 +30,7 @@ class S3Service:
                 ContentType=resp.headers.get("content-type", "image/jpeg"),
             )
 
-        return self.get_url(key)
+        return self.avatar_proxy_url(key)
 
     async def get_presigned_put_url(self, key: str, content_type: str = "image/jpeg") -> str:
         async with self._client() as s3:
@@ -42,8 +42,15 @@ class S3Service:
         # Replace internal docker URL with public URL so browsers can reach it
         return url.replace(self._url, self._public_url)
 
-    def get_url(self, key: str) -> str:
-        return f"{self._public_url}/{self.BUCKET}/{key}"
+    async def get_object(self, key: str) -> tuple[bytes, str]:
+        async with self._client() as s3:
+            response = await s3.get_object(Bucket=self.BUCKET, Key=key)
+            body = await response["Body"].read()
+            content_type = response.get("ContentType", "application/octet-stream")
+            return body, content_type
+
+    def avatar_proxy_url(self, key: str) -> str:
+        return f"/api/user/avatar/{key}"
 
     def avatar_key(self, user_id: int, source: str) -> str:
         return f"{user_id}/{source}"

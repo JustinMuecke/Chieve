@@ -7,8 +7,8 @@ Chieve is an achievement-hunter platform that aggregates gaming achievements fro
 **Monorepo layout:**
 ```
 Chieve/
+├── docker-compose.yml            # Full local stack (root level, not inside backend/)
 ├── backend/
-│   ├── docker-compose.yml        # Full local stack
 │   ├── .env                      # Shared infra secrets (Postgres, MinIO, JWT_SECRET)
 │   ├── docs/design.md            # Full technical design doc — read before making architectural decisions
 │   ├── User_Service/             # FastAPI, port 8000
@@ -53,9 +53,12 @@ Both services are **FastAPI** apps sharing the same **Postgres** instance and fo
 - Run migrations locally: `cd <service>/ && alembic upgrade head`
 - Generate a new migration: `alembic revision --autogenerate -m "description"`
 
-**S3 / MinIO (User Service only):**
-- `S3_URL` is the internal Docker network URL (used for API calls)
-- `S3_PUBLIC_URL` is the browser-accessible URL (substituted into presigned PUT URLs)
+**S3 / MinIO:**
+- User Service uses MinIO for custom avatars (bucket: `avatars`)
+- Achievement Service uses MinIO for guide markdown content and header images (bucket: `guides`)
+- `S3_URL` is the internal Docker network URL (used for API calls from containers)
+- `S3_PUBLIC_URL` is the browser-accessible URL (used to build public object URLs)
+- Both buckets have anonymous GET access (set by `minio-init` on startup)
 - Avatar copy-on-login is best-effort — wrapped in `try/except: pass`, never blocks auth
 
 **Platform sync abstraction (Achievement Service):**
@@ -70,7 +73,6 @@ Both services are **FastAPI** apps sharing the same **Postgres** instance and fo
 ## Running the Stack
 
 ```bash
-cd backend/
 docker compose up --build
 ```
 
@@ -86,6 +88,12 @@ Run a service locally (outside Docker):
 cd backend/User_Service
 POSTGRES_HOST=localhost uvicorn src.main:app --reload --port 8000
 ```
+
+**Frontend npm packages and the node_modules volume:** The frontend container stores `node_modules` in an anonymous Docker volume, not the bind-mounted source tree. After adding a new npm package, `--build` alone won't help because Docker mounts the old volume on top. Fix:
+1. `docker compose stop frontend`
+2. `docker inspect chieve-frontend-1` → find the anonymous volume hash under `/app/node_modules`
+3. `docker rm <frontend_container_id>` then `docker volume rm <hash>`
+4. `docker compose up --build frontend`
 
 ---
 
@@ -139,7 +147,7 @@ STEAM_API_KEY
 
 ## Achievement Service (`backend/Achievement_Service/`)
 
-**Responsibility:** Games schema, achievement records, user achievement logs, leaderboard, feed, search, milestones. Calls User Service internal API for user data.
+**Responsibility:** Games schema, achievement records, user achievement logs, leaderboard, feed, search, milestones, guides. Calls User Service internal API for user data.
 
 **Key routes** (`/api/achievements/`):
 - `POST /sync` → enqueue Celery task (rate-limited 1/15 min via Redis), returns `202 { task_id }`
@@ -149,10 +157,17 @@ STEAM_API_KEY
 - `GET /profile` → own stats (total achievements, global points, community points)
 - `GET /profile/{user_id}` → another user's public stats
 - `GET /leaderboard?scope=global|friends&sort_by=global_points|community_points&page=N`
-- `GET /feed?days=14&limit_per_user=N` → recent unlocks by followed users, grouped by user→game→achievements
+- `GET /feed?days=14&limit_per_user=N` → recent unlocks **and guide publications** by followed users, grouped by user
 - `GET /search?q=&game_id=&max_rarity=` → achievement search
 - `GET /milestones` → own milestones
 - `GET /milestones/{user_id}` → another user's public milestones
+
+**Guide routes** (`/api/achievements/`):
+- `GET /guides/{app_id}` → list guides for a game, split into `my_guides` + `other_guides`; includes `author_avatar_url`, `header_image_url`, `is_favorite`, `author_achievement_count`, `game_total_achievements`
+- `POST /guides/{app_id}` → create guide (multipart form: `title`, `description` optional, `file` markdown blob, `header_image` optional image)
+- `PUT /guides/{app_id}/{guide_id}` → update own guide (same multipart fields, all optional)
+- `POST /guides/{guide_id}/favorite` → add to favorites (204)
+- `DELETE /guides/{guide_id}/favorite` → remove from favorites (204)
 
 **DB tables:**
 ```
@@ -161,6 +176,8 @@ achievements (id, game_id → games, api_name, display_name, description, icon_u
 user_achievements (user_id, achievement_id → achievements, unlocked_at)  [PK: user_id + achievement_id]
 user_profile_stats (user_id [PK], total_achievements, total_global_points, total_community_points, updated_at)
 user_milestones (id, user_id, milestone_type, game_id → games, achievement_id → achievements, achieved_at)
+guides (id, user_id, game_id → games, title, description, s3_key, header_image_s3_key, created_at, updated_at)
+guide_favorites (user_id, guide_id → guides, created_at)  [PK: user_id + guide_id, CASCADE on guide delete]
 mv_community_points  [MATERIALIZED VIEW — refreshed daily by Celery]
 ```
 
@@ -169,6 +186,13 @@ mv_community_points  [MATERIALIZED VIEW — refreshed daily by Celery]
 **Points system:**
 - Global points: `max(10, round(100 - global_unlock_percent))` — stored in `achievements.global_points`
 - Community points: materialized view on local unlock %, refreshed daily; aggregates cached in `user_profile_stats`
+
+**S3 (guides bucket):**
+- `S3Service` in `src/services/s3_service.py` — bucket is `guides`
+- `guide_key(user_id, guide_uuid)` → `{user_id}/{guide_uuid}.md`
+- `header_image_key(user_id, guide_uuid)` → `{user_id}/{guide_uuid}_header`
+- `get_url(key)` → `{S3_PUBLIC_URL}/guides/{key}` — used for both content and images
+- All objects publicly readable; no presigned URLs needed
 
 **Celery:**
 - Broker + result backend: Redis (`REDIS_URL`)
@@ -185,9 +209,19 @@ mv_community_points  [MATERIALIZED VIEW — refreshed daily by Celery]
 **Profile endpoints:**
 - `GET /profile` and `GET /profile/{user_id}` both return 0 stats (not 404) when no `user_profile_stats` row exists
 
+**Feed behaviour:**
+- Fetches achievement unlocks and guide publications in parallel (`asyncio.gather`)
+- Merges both into `FeedUserEntry` — a user appears if they have either achievements OR guides in the window
+- `FeedUserEntry` shape: `{ user_id, username, avatar_url, games: [...], guides: [...] }`
+- `FeedGuide` shape: `{ guide_id, title, description, game_name, app_id, published_at }`
+
 **Migrations:**
 - `b1c2d3e4f5a6` — full initial schema (all tables + materialized view)
 - `c2d3e4f5a6b7` — add `global_stats_updated_at` to `games`
+- `d3e4f5a6b7c8` — create guides table
+- `e4f5a6b7c8d9` — rename `content` to `s3_key` in guides
+- `f5a6b7c8d9e0` — add guide_favorites table
+- `g6a7b8c9d0e1` — add `description` and `header_image_s3_key` to guides
 
 **Environment:**
 ```
@@ -197,13 +231,64 @@ ENV
 REDIS_URL    # redis://redis:6379/0
 USER_SERVICE_URL  # http://user_service:8000
 STEAM_API_KEY
+S3_URL               # internal: http://minio:9000
+S3_PUBLIC_URL        # browser: http://localhost:9000
+S3_ACCESS_KEY, S3_SECRET_KEY
 ```
 
 ---
 
 ## Frontend (`frontend/`)
 
-Vite + React 19 + TypeScript. Dev server: `npm run dev` (port 5173). Not yet implemented beyond scaffold.
+Vite + React 19 + TypeScript. CSS Modules (SCSS). React Query (`@tanstack/react-query`) for data fetching and mutations. React Router for navigation.
+
+**Key pages and components:**
+- `GamesPage` — user's synced games grid
+- `GameDetailPage` — game detail with three tabs: Achievements, Friends Feed, Guides
+- `ProfilePage` — own stats, linked platforms, avatar settings
+- `RanglistPage` — global/friends leaderboard
+- `FriendsPage` — following/followers social graph (currently uses mock data, TODO: connect to backend)
+- `MainPage` — landing page with hero + features
+
+**Guides components** (`src/components/guides/`):
+- `GuidesTab.tsx` — orchestrator: shows `GuideBrowser` or `GuideViewer` based on selected guide state
+- `GuideBrowser.tsx` — lists guides split into "Your Guides" / "Other Users' Guides"; inline editor (create/edit) with markdown preview, header image upload with preview, description; cards are clickable
+- `GuideViewer.tsx` — renders selected guide: banner image, header with title/description left and author avatar/name/date/achievement count right, ReactMarkdown content, back button at bottom
+- `guidesTab.module.scss` — shared styles for all three components
+
+**CSS gotcha:** `#root { text-align: center }` in `index.css` cascades into all components. Always reset with `text-align: left` in content containers (`.markdownPreview`, `.viewerContent`, etc.).
+
+**API layer** (`src/api/`):
+- `guides.ts` — `useGuides`, `useCreateGuide`, `useUpdateGuide`, `useToggleFavorite` (React Query hooks)
+- All guide mutations send multipart FormData; content is a `Blob` with `text/markdown` type
+
+---
+
+## Planned Features
+
+### Game Recommendation System
+
+**Not yet implemented.** Design agreed upon:
+
+**Goal:** Suggest games the user doesn't own based on what they've played.
+
+**Embedding approach:**
+- Use `sentence-transformers` (`all-MiniLM-L6-v2`, 384-dim) to embed game descriptions — tags alone are too coarse and often misleading across genres
+- Store embeddings with `pgvector` (`vector(384)` column on `games` or separate `game_embeddings` table)
+- Embeddings are generated as a Celery task when new games are synced (best-effort, non-blocking)
+
+**Recommendation logic (mix of two strategies):**
+1. **Random anchor + nearest neighbor:** Pick a random game from the user's library, weighted by `completion_pct × recency_decay`. Find the K nearest games (cosine similarity via pgvector) the user doesn't own yet.
+2. **Average anchor:** Average all the user's game vectors, find nearest unowned games.
+- Strategy 1 is preferred — averaging risks a bland centroid that matches nothing well.
+
+**Proposed route:** `GET /api/achievements/recommendations` → `[{ app_id, name, header_image_url, similarity_score }]`
+
+**Infrastructure needed:**
+- `pgvector` extension enabled in Postgres (add to `minio-init` or a separate init container)
+- `sentence-transformers` added to Achievement Service dependencies
+- New Alembic migration to add `embedding vector(384)` to `games`
+- New Celery task: `generate_game_embedding(game_id)` — called after upsert when embedding is missing
 
 ---
 
@@ -217,3 +302,4 @@ Vite + React 19 + TypeScript. Dev server: `npm run dev` (port 5173). Not yet imp
 - Do not import `ServiceManager` directly in routes — always go through `Depends(get_services)`
 - Do not add new platforms by editing steam.py — implement `BasePlatformService` and register in `dispatcher.py`
 - Do not call User Service from route handlers directly — use `services.user_client` (injected via ServiceManager)
+- Do not use presigned URLs for guide content/images — the bucket has public anonymous GET access, use `get_url()` directly

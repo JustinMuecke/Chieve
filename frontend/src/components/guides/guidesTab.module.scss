@@ -41,8 +41,7 @@
   line-height: 1.5;
 }
 
-.createButton,
-.saveButton {
+.createButton {
   height: 36px;
   padding: 0 10px;
 
@@ -58,22 +57,40 @@
 
   font-size: 1rem;
   font-weight: 600;
-  text-decoration: none;
-
   cursor: pointer;
   transition: 0.2s ease;
 }
 
-.createButton:hover,
-.saveButton:hover {
+.createButton:hover {
   background: rgba(199, 125, 255, 0.35);
   border-color: #c77dff;
   transform: translateY(-2px);
 }
 
 .saveButton {
-  background: rgba(199, 125, 255, 0.22);
-  border-color: rgba(199, 125, 255, 0.45);
+  padding: 10px 16px;
+
+  border: none;
+  border-radius: 999px;
+
+  background: #c77dff;
+  color: #23001f;
+
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.saveButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 18px rgba(199, 125, 255, 0.45);
+}
+
+.saveButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .summaryGrid {
@@ -183,12 +200,37 @@
   box-shadow: 0 0 0 3px rgba(199, 125, 255, 0.12);
 }
 
+.editorMeta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.optional {
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.headerImagePreview {
+  width: 100%;
+  max-height: 120px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.fileInput {
+  width: 100%;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
 .markdownGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 18px;
-
-  margin-top: 18px;
 }
 
 .previewBox {
@@ -197,17 +239,7 @@
   gap: 8px;
 }
 
-.previewBox pre,
-.guidePreview {
-  margin: 0;
-  white-space: pre-wrap;
-  word-break: break-word;
-
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  line-height: 1.5;
-}
-
-.previewBox pre {
+.markdownPreview {
   min-height: 260px;
   padding: 14px;
 
@@ -216,6 +248,20 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
 
   color: rgba(255, 255, 255, 0.78);
+  line-height: 1.6;
+  overflow-y: auto;
+  text-align: left;
+
+  h1, h2, h3, h4 { margin: 0.8em 0 0.4em; line-height: 1.3; }
+  p { margin: 0 0 0.75em; }
+  ul, ol { margin: 0 0 0.75em 1.4em; }
+  li { margin-bottom: 0.25em; }
+  code { padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.1); font-family: ui-monospace, monospace; font-size: 0.88em; }
+  pre { padding: 12px; border-radius: 10px; background: rgba(0,0,0,0.32); overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 0 0 0.75em; padding: 8px 14px; border-left: 3px solid rgba(199,125,255,0.5); color: rgba(255,255,255,0.6); }
+  a { color: #c77dff; }
+  hr { border: none; border-top: 1px solid rgba(255,255,255,0.12); margin: 1em 0; }
 }
 
 .emptyPreview {
@@ -246,22 +292,44 @@
 }
 
 .secondaryButton,
-.editButton,
-.readButton {
-  padding: 10px 15px;
+.editButton {
+  padding: 10px 16px;
 
   border-radius: 999px;
 
   font-weight: 800;
   cursor: pointer;
-
   transition: 0.2s ease;
 }
 
 .secondaryButton {
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
   color: white;
+}
+
+.secondaryButton:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.secondaryButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.guideSection {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sectionLabel {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .guideList {
@@ -271,24 +339,117 @@
 }
 
 .guideCard {
-  padding: 22px;
-
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.038);
   border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
 
+  cursor: pointer;
   transition: 0.2s ease;
 }
 
 .guideCard:hover {
   transform: translateY(-3px);
   border-color: rgba(199, 125, 255, 0.32);
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.cardHeaderImage {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+  display: block;
+}
+
+.cardBody {
+  padding: 18px;
+}
+
+.cardAuthorRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.cardAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.cardAvatarPlaceholder {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(199, 125, 255, 0.25);
+  border: 1px solid rgba(199, 125, 255, 0.35);
+
+  color: #d8b4ff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.cardAuthorName {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardDate {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.38);
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.cardTitle {
+  margin: 10px 0 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: white;
+  text-align: left;
+  line-height: 1.3;
+}
+
+.cardDescription {
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.52);
+  line-height: 1.5;
+  text-align: left;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .guideTopRow {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   gap: 16px;
+}
+
+.cardControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .badgeRow {
@@ -326,28 +487,41 @@
 }
 
 .favoriteButton {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
 
   flex: 0 0 auto;
 
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.58);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 
-  font-size: 1.35rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+
+  font-size: 1.1rem;
   cursor: pointer;
-
   transition: 0.2s ease;
 }
 
-.favoriteButton:hover,
+.favoriteButton:hover {
+  background: rgba(199, 125, 255, 0.35);
+  border-color: #c77dff;
+  transform: translateY(-2px);
+}
+
 .favoriteButtonActive {
+  background: rgba(255, 209, 102, 0.15);
+  border-color: rgba(255, 209, 102, 0.45);
   color: #ffd166;
-  border-color: rgba(255, 209, 102, 0.4);
-  box-shadow: 0 0 18px rgba(255, 209, 102, 0.22);
+}
+
+.favoriteButtonActive:hover {
+  background: rgba(255, 209, 102, 0.25);
+  border-color: #ffd166;
 }
 
 .guidePreview {
@@ -372,15 +546,29 @@
 }
 
 .editButton {
-  border: 1px solid rgba(199, 125, 255, 0.28);
-  background: rgba(199, 125, 255, 0.12);
-  color: #d8b4ff;
+  height: 36px;
+  padding: 0 10px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
 }
 
-.readButton {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.06);
-  color: white;
+.editButton:hover {
+  background: rgba(199, 125, 255, 0.35);
+  border-color: #c77dff;
+  transform: translateY(-2px);
 }
 
 .emptyState {
@@ -404,6 +592,178 @@
   color: rgba(255, 255, 255, 0.56);
 }
 
+// ── Guide Viewer ──────────────────────────────────────────────────────────────
+
+.guideViewer {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.viewerBack {
+  align-self: flex-start;
+  height: 36px;
+  padding: 0 16px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+
+  &:hover {
+    background: rgba(199, 125, 255, 0.35);
+    border-color: #c77dff;
+    transform: translateY(-2px);
+  }
+}
+
+.viewerBanner {
+  width: 100%;
+  max-height: 160px;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+.viewerDescription {
+  margin: 8px 0 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.viewerAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid rgba(199, 125, 255, 0.3);
+}
+
+.viewerAvatarPlaceholder {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(199, 125, 255, 0.2);
+  border: 2px solid rgba(199, 125, 255, 0.35);
+
+  color: #d8b4ff;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.viewerHeader {
+  padding: 24px 28px;
+
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.038);
+  border: 1px solid rgba(199, 125, 255, 0.15);
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.viewerHeaderMain {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.viewerTitle {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: white;
+  text-align: left;
+  line-height: 1.25;
+}
+
+.viewerAuthorBlock {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+  }
+}
+
+.viewerAuthorLink {
+  color: #c77dff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.viewerDate {
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 0.8rem;
+}
+
+
+.viewerContent {
+  padding: 28px;
+
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.7;
+  font-size: 1rem;
+  text-align: left;
+
+  h1, h2, h3, h4 { margin: 1.2em 0 0.5em; line-height: 1.3; color: white; }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; }
+  h3 { font-size: 1.1rem; }
+  p { margin: 0 0 1em; }
+  ul, ol { margin: 0 0 1em 1.6em; }
+  li { margin-bottom: 0.35em; }
+  code { padding: 2px 7px; border-radius: 5px; background: rgba(255,255,255,0.1); font-family: ui-monospace, monospace; font-size: 0.88em; }
+  pre { padding: 16px; border-radius: 12px; background: rgba(0,0,0,0.36); overflow-x: auto; margin-bottom: 1em; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 0 0 1em; padding: 10px 18px; border-left: 3px solid rgba(199,125,255,0.55); color: rgba(255,255,255,0.62); font-style: italic; }
+  a { color: #c77dff; text-decoration: underline; }
+  hr { border: none; border-top: 1px solid rgba(255,255,255,0.12); margin: 1.5em 0; }
+  strong { color: white; }
+  img { max-width: 100%; border-radius: 10px; }
+}
+
+.viewerState {
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+
 @media (max-width: 900px) {
   .header {
     flex-direction: column;
@@ -411,6 +771,7 @@
   }
 
   .summaryGrid,
+  .editorMeta,
   .markdownGrid,
   .guideList {
     grid-template-columns: 1fr;
