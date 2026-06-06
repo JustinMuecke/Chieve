@@ -1,186 +1,306 @@
+import { Link } from "react-router-dom";
 import style from "./profile.module.scss";
 
-type Game = {
-  id: number;
-  title: string;
-  platform: string;
-  achievementsCompleted: number;
-  achievementsTotal: number;
-  playtimeHours: number;
+import ProfileFeed from "../profileFeed/ProfileFeed";
+
+import { useState } from "react";
+
+
+
+
+
+type ProfileSection = "feed" | "guides" | "games";
+
+type AchievementStats = {
+  perfect: number;
+  legendary: number;
+  rare: number;
+  uncommon: number;
+  common: number;
+  total: number;
+};
+
+type ProfileData = {
+  user_id: number;
+  username: string;
+  avatar_url: string | null;
+  banner_url: string | null;
+  description: string | null;
+  followers_count: number;
+  following_count: number;
+  is_own_profile: boolean;
+  is_following: boolean;
+  achievements: AchievementStats;
 };
 
 function Profile() {
-  /**
-   * TODO später:
-   * Diese Daten sollen nicht hardcoded bleiben.
-   *
-   * Mögliche spätere Datenquellen:
-   * - Steam API für Avatar, Anzeigename, Steam-ID
-   * - Eigene Datenbank für verknüpfte Plattformen
-   * - Eigene Datenbank für Spiele, Achievements, Scores
-   * - Backend-Endpoint z. B. GET /api/profile/:userId
-   */
-  const profileData = {
-    displayName: "AchievementHunter42",
-    steamName: "SteamUserPlaceholder",
-    avatarUrl: "https://placehold.co/160x160/2a0023/c77dff?text=Avatar",
-    level: 27,
-    metaScore: 8420,
-    completedAchievements: 318,
-    totalAchievements: 920,
-    linkedPlatforms: ["Steam", "Epic Games", "Xbox", "PlayStation"],
-  };
+  const [activeSection, setActiveSection] = useState<ProfileSection>("feed");
 
   /**
-   * TODO später:
-   * games aus der Datenbank laden.
-   * Beispiel:
+   * TODO BACKEND:
+   * Diese Mock-Daten später durch den echten Profile-Endpoint ersetzen.
    *
-   * const games = await fetch("/api/user/games");
+   * Mögliche Logik:
+   *
+   * - Wenn /profile aufgerufen wird:
+   *   GET /me oder GET /profiles/me
+   *
+   * - Wenn /profile/:user_id aufgerufen wird:
+   *   GET /profiles/:user_id
+   *
+   * Der Endpoint sollte direkt liefern:
+   * - is_own_profile
+   * - is_following
+   * - followers_count
+   * - following_count
+   * - achievement counts nach Rarity
    */
-  const games: Game[] = [
+  const profile: ProfileData = {
+    user_id: 42,
+    username: "Xelaly",
+    avatar_url: null,
+    banner_url: null,
+    description:
+      "Achievement hunter, backlog survivor, and occasional completionist. Currently trying to turn unfinished games into measurable regret.",
+    followers_count: 128,
+    following_count: 64,
+    is_own_profile: true,
+    is_following: false,
+    achievements: {
+      perfect: 7,
+      legendary: 13,
+      rare: 48,
+      uncommon: 156,
+      common: 312,
+      total: 536,
+    },
+  };
+
+  function handleFollowClick() {
+    /**
+     * TODO BACKEND:
+     * Nur anzeigen/nutzen, wenn profile.is_own_profile === false.
+     *
+     * Wenn profile.is_following === false:
+     * POST /social/follow/{profile.user_id}
+     *
+     * Wenn profile.is_following === true:
+     * DELETE /social/follow/{profile.user_id}
+     *
+     * Danach Profile-Daten neu laden oder State lokal aktualisieren:
+     * - is_following togglen
+     * - followers_count +1 oder -1
+     */
+  }
+
+  function handleEditClick() {
+    /**
+     * TODO:
+     * Nur anzeigen, wenn profile.is_own_profile === true.
+     *
+     * Optionen:
+     * - Modal öffnen
+     * - zu /profile/edit navigieren
+     * - Inline Edit für Banner, Avatar, Description
+     */
+  }
+
+  const achievementItems = [
     {
-      id: 1,
-      title: "Portal 2",
-      platform: "Steam",
-      achievementsCompleted: 42,
-      achievementsTotal: 51,
-      playtimeHours: 28,
+      key: "perfect",
+      label: "100%",
+      value: profile.achievements.perfect,
+      className: style.perfect,
     },
     {
-      id: 2,
-      title: "Hades",
-      platform: "Epic Games",
-      achievementsCompleted: 31,
-      achievementsTotal: 49,
-      playtimeHours: 64,
+      key: "legendary",
+      label: "Legendary",
+      value: profile.achievements.legendary,
+      className: style.legendary,
     },
     {
-      id: 3,
-      title: "Elden Ring",
-      platform: "Steam",
-      achievementsCompleted: 24,
-      achievementsTotal: 42,
-      playtimeHours: 112,
+      key: "rare",
+      label: "Rare",
+      value: profile.achievements.rare,
+      className: style.rare,
+    },
+    {
+      key: "uncommon",
+      label: "Uncommon",
+      value: profile.achievements.uncommon,
+      className: style.uncommon,
+    },
+    {
+      key: "common",
+      label: "Common",
+      value: profile.achievements.common,
+      className: style.common,
+    },
+    {
+      key: "total",
+      label: "All",
+      value: profile.achievements.total,
+      className: style.total,
     },
   ];
 
   return (
     <main className={style.profilePage}>
-      <section className={style.profileHero}>
-        <div className={style.avatarWrapper}>
-          {/*
-            TODO später:
-            avatarUrl durch Steam-Avatar ersetzen.
-            Beispiel: profileData.avatarUrl = steamUser.avatarFull
-          */}
-          <img
-            src={profileData.avatarUrl}
-            alt={`${profileData.displayName} profile avatar`}
-            className={style.avatar}
-          />
-        </div>
+      <section className={style.profileCard}>
+        <div
+          className={style.banner}
+          style={
+            profile.banner_url
+              ? { backgroundImage: `url(${profile.banner_url})` }
+              : undefined
+          }
+        />
 
-        <div className={style.profileInfo}>
-          <p className={style.kicker}>Player Profile</p>
+        <div className={style.profileHead}>
+          <div className={style.identityBlock}>
+            <div className={style.avatarOuter}>
+              {profile.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt={`${profile.username} avatar`}
+                  className={style.avatar}
+                />
+              ) : (
+                <div className={style.avatarPlaceholder}>
+                  {profile.username[0]?.toUpperCase()}
+                </div>
+              )}
+            </div>
 
-          {/*
-            TODO später:
-            Anzeigename aus Steam / User-Datenbank setzen.
-          */}
-          <h1>{profileData.displayName}</h1>
-
-          <p className={style.subtitle}>
-            Connected as <strong>{profileData.steamName}</strong>. Track your
-            achievements, compare your progress, and hunt down unfinished games.
-          </p>
-
-          <div className={style.platformList}>
-            {profileData.linkedPlatforms.map((platform) => (
-              <span key={platform}>{platform}</span>
-            ))}
+            <h1>{profile.username}</h1>
           </div>
-        </div>
 
-        <div className={style.scoreCard}>
-          <p>Meta Score</p>
-          <strong>{profileData.metaScore}</strong>
-          <span>Level {profileData.level}</span>
-        </div>
-      </section>
+          <div className={style.socialStats}>
+            <article>
+              <strong>{profile.followers_count}</strong>
+              <span>Followers</span>
+            </article>
 
-      <section className={style.statsGrid}>
-        <article>
-          <span>Completed</span>
-          <strong>{profileData.completedAchievements}</strong>
-          <p>Achievements unlocked</p>
-        </article>
+            <article>
+              <strong>{profile.following_count}</strong>
+              <span>Following</span>
+            </article>
+          </div>
 
-        <article>
-          <span>Total</span>
-          <strong>{profileData.totalAchievements}</strong>
-          <p>Achievements tracked</p>
-        </article>
-
-        <article>
-          <span>Completion</span>
-          <strong>
-            {Math.round(
-              (profileData.completedAchievements /
-                profileData.totalAchievements) *
-                100
+          <div className={style.profileActions}>
+            {!profile.is_own_profile && (
+              <button
+                type="button"
+                className={style.primaryButton}
+                onClick={handleFollowClick}
+              >
+                {profile.is_following ? "Unfollow" : "Follow"}
+              </button>
             )}
-            %
-          </strong>
-          <p>Across connected platforms</p>
-        </article>
-      </section>
 
-      <section className={style.librarySection}>
-        <div className={style.sectionHeader}>
-          <div>
-            <p className={style.kicker}>Game Library</p>
-            <h2>Your tracked games</h2>
+            {profile.is_own_profile && (
+              <button
+                type="button"
+                className={style.secondaryButton}
+                onClick={handleEditClick}
+              >
+                Edit profile
+              </button>
+            )}
           </div>
-
-          {/*
-            TODO später:
-            Button kann zu einer vollständigen GamesPage führen.
-          */}
-          <button>View all games</button>
         </div>
 
-        <div className={style.gameGrid}>
-          {games.map((game) => {
-            const progress =
-              (game.achievementsCompleted / game.achievementsTotal) * 100;
+        <section className={style.descriptionBox}>
+          <h2>Description</h2>
+          <p>
+            {profile.description ||
+              "No description yet. This player is mysterious, suspicious, or just busy hunting achievements."}
+          </p>
+        </section>
 
-            return (
-              <article className={style.gameCard} key={game.id}>
-                <div className={style.gameTopRow}>
-                  <div>
-                    <h3>{game.title}</h3>
-                    <p>{game.platform}</p>
-                  </div>
+        <section className={style.achievementSection}>
+          <div className={style.sectionHeader}>
+            <p className={style.kicker}>Achievement Breakdown</p>
+            <h2>Collected trophies</h2>
+          </div>
 
-                  <span>{Math.round(progress)}%</span>
-                </div>
-
-                <div className={style.progressBar}>
-                  <div style={{ width: `${progress}%` }} />
-                </div>
-
-                <div className={style.gameMeta}>
-                  <span>
-                    {game.achievementsCompleted}/{game.achievementsTotal} achievements
-                  </span>
-                  <span>{game.playtimeHours}h played</span>
+          <div className={style.achievementRow}>
+            {achievementItems.map((item) => (
+              <article
+                key={item.key}
+                className={`${style.achievementItem} ${item.className}`}
+              >
+                <div className={style.trophyIcon}>🏆</div>
+                <div>
+                  <strong>{item.value}</strong>
+                  <span>{item.label}</span>
                 </div>
               </article>
-            );
-          })}
+            ))}
+          </div>
+        </section>
+
+        <div className={style.profileNav}>
+          <button
+            type="button"
+            className={`${style.profileNavButton} ${
+              activeSection === "feed" ? style.profileNavButtonActive : ""
+            }`}
+            onClick={() => setActiveSection("feed")}
+          >
+            Feed
+          </button>
+
+          <button
+            type="button"
+            className={`${style.profileNavButton} ${
+              activeSection === "guides" ? style.profileNavButtonActive : ""
+            }`}
+            onClick={() => setActiveSection("guides")}
+          >
+            Guides
+          </button>
+
+          <button
+            type="button"
+            className={`${style.profileNavButton} ${
+              activeSection === "games" ? style.profileNavButtonActive : ""
+            }`}
+            onClick={() => setActiveSection("games")}
+          >
+            Games
+          </button>
         </div>
       </section>
+
+
+
+
+      <section className={style.profileSectionContent}>
+        {activeSection === "feed" && (
+          <ProfileFeed userId={profile.user_id} />
+        )}
+
+        {activeSection === "guides" && (
+          <div className={style.placeholderPanel}>
+            <h2>Guides</h2>
+            <p>
+              Here we will show guides written by this user.
+            </p>
+          </div>
+        )}
+
+        {activeSection === "games" && (
+          <div className={style.placeholderPanel}>
+            <h2>Games</h2>
+            <p>
+              Here we will show this user's tracked games.
+            </p>
+          </div>
+        )}
+      </section>
+
+
     </main>
   );
 }
