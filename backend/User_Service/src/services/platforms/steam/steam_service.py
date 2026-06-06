@@ -9,14 +9,18 @@ import httpx
 
 from src.models.errors import SteamAuthError, SteamStateError
 from src.services.postgres_service import PostgresService
+from src.services.s3_service import S3Service
 
 STEAM_OPENID_URL = "https://steamcommunity.com/openid/login"
+STEAM_PLAYER_API = "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/"
 STEAM_ID_PATTERN = re.compile(r"https://steamcommunity\.com/openid/id/(\d+)$")
 
 
 class SteamService:
-    def __init__(self, postgres: PostgresService):
+    def __init__(self, postgres: PostgresService, s3: S3Service):
         self.postgres = postgres
+        self.s3 = s3
+        self.steam_api_key = os.getenv("STEAM_API_KEY")
         self.callback_url = os.getenv("STEAM_CALLBACK_URL", "http://localhost:8000/api/user/steam/callback")
         self.realm = os.getenv("STEAM_REALM", "http://localhost:8000")
         self.frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
@@ -77,6 +81,29 @@ class SteamService:
             platform_user_id=steam_id,
         )
 
+        await self._copy_steam_avatar(user_id, steam_id)
+
         redirect = RedirectResponse(url=f"{self.frontend_url}/settings")
         redirect.delete_cookie("steam_state")
         return redirect
+
+    async def _copy_steam_avatar(self, user_id: int, steam_id: str) -> None:
+        try:
+            async with httpx.AsyncClient() as client:
+                resp = await client.get(
+                    STEAM_PLAYER_API,
+                    params={"key": self.steam_api_key, "steamids": steam_id},
+                )
+                resp.raise_for_status()
+                players = resp.json().get("response", {}).get("players", [])
+                if not players:
+                    return
+                avatar_url = players[0].get("avatarfull")
+                if not avatar_url:
+                    return
+
+            key = self.s3.avatar_key(user_id, "steam")
+            s3_url = await self.s3.copy_from_url(avatar_url, key)
+            await self.postgres.update_linked_account_avatar(user_id, "steam", s3_url)
+        except Exception:
+            pass  # avatar copy is best-effort, never fail the link

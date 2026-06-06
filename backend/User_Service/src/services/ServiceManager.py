@@ -20,5 +20,5 @@ class ServiceManager:
             access_key=os.getenv("S3_ACCESS_KEY"),
             secret_key=os.getenv("S3_SECRET_KEY"),
         )
-        self.github_oauth = GithubOAuthService(auth=self.auth, postgres=self.postgres)
-        self.steam = SteamService(postgres=self.postgres)
+        self.github_oauth = GithubOAuthService(auth=self.auth, postgres=self.postgres, s3=self.s3)
+        self.steam = SteamService(postgres=self.postgres, s3=self.s3)

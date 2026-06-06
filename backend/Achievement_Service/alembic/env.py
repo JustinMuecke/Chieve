@@ -7,8 +7,7 @@ from sqlalchemy import pool
 from alembic import context
 
 from src.models.base import Base
-import src.models.user  # noqa: F401 — registers models with Base.metadata
-import src.models.follow  # noqa: F401
+import src.models.achievement  # noqa: F401 — registers models with Base.metadata
 
 config = context.config
 
@@ -32,13 +31,18 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        version_table="achievement_alembic_version",
     )
     with context.begin_transaction():
         context.run_migrations()
 
 
 def do_run_migrations(connection):
-    context.configure(connection=connection, target_metadata=target_metadata)
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        version_table="achievement_alembic_version",
+    )
     with context.begin_transaction():
         context.run_migrations()
 

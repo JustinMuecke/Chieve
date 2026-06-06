@@ -11,4 +11,5 @@ dependencies = [
     "sqlalchemy[asyncio]",
     "asyncpg",
     "alembic",
+    "aioboto3",
 ]
