@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import selectinload
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 
 from src.models.follow import Follow
 from src.models.user import LinkedAccount, User
@@ -173,3 +173,26 @@ class PostgresService:
                 .order_by(Follow.created_at.desc())
             )
             return list(result.scalars().all())
+
+    async def get_user_social_stats(self, user_id: int, viewer_id: int | None) -> dict:
+        async with self._session() as session:
+            followers_result = await session.execute(
+                select(func.count()).select_from(Follow).where(Follow.following_id == user_id)
+            )
+            following_result = await session.execute(
+                select(func.count()).select_from(Follow).where(Follow.follower_id == user_id)
+            )
+            is_following = False
+            if viewer_id is not None and viewer_id != user_id:
+                follow_check = await session.execute(
+                    select(Follow).where(
+                        Follow.follower_id == viewer_id,
+                        Follow.following_id == user_id,
+                    )
+                )
+                is_following = follow_check.scalar_one_or_none() is not None
+            return {
+                "followers_count": followers_result.scalar_one(),
+                "following_count": following_result.scalar_one(),
+                "is_following": is_following,
+            }

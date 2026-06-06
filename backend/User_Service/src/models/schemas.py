@@ -28,3 +28,14 @@ class UserSummary(BaseModel):
     id: int
     username: str
     avatar_url: str | None
+
+
+class FullUserProfile(BaseModel):
+    id: int
+    username: str
+    avatar_url: str | None
+    banner_url: str | None
+    description: str | None
+    followers_count: int
+    following_count: int
+    is_following: bool

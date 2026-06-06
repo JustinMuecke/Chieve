@@ -172,6 +172,30 @@ class GameGuidesResponse(BaseModel):
     other_guides: list[GuideResponse]
 
 
+# ── User Profile ─────────────────────────────────────────────────────────────
+
+class UserAchievementBreakdown(BaseModel):
+    perfect: int
+    legendary: int
+    rare: int
+    uncommon: int
+    common: int
+    total: int
+
+
+class UserFullProfile(BaseModel):
+    user_id: int
+    username: str
+    avatar_url: str | None
+    banner_url: str | None
+    description: str | None
+    followers_count: int
+    following_count: int
+    is_own_profile: bool
+    is_following: bool
+    achievements: UserAchievementBreakdown
+
+
 # ── Milestones ────────────────────────────────────────────────────────────────
 
 class MilestoneEntry(BaseModel):

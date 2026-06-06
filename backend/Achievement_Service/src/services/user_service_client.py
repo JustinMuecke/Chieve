@@ -52,6 +52,25 @@ class UserServiceClient:
                 raise UserServiceError(f"User Service call failed: {e}") from e
         return resp.json()
 
+    async def get_user_social_profile(self, user_id: int, viewer_id: int | None = None) -> dict:
+        headers = {"Authorization": f"Bearer {self._service_token()}"}
+        params = {}
+        if viewer_id is not None:
+            params["viewer_id"] = viewer_id
+        async with httpx.AsyncClient(timeout=10) as client:
+            try:
+                resp = await client.get(
+                    f"{self._base_url}/internal/users/{user_id}/social-profile",
+                    headers=headers,
+                    params=params,
+                )
+                if resp.status_code == 404:
+                    return {}
+                resp.raise_for_status()
+            except httpx.HTTPError as e:
+                raise UserServiceError(f"User Service call failed: {e}") from e
+        return resp.json()
+
     async def get_users_by_ids(self, user_ids: list[int]) -> list[UserSummary]:
         if not user_ids:
             return []

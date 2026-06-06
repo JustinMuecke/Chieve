@@ -14,6 +14,8 @@ class User(Base):
     github_id: Mapped[str | None] = mapped_column(String(100), unique=True)
     avatar_url: Mapped[str | None] = mapped_column(String(500))
     github_avatar_url: Mapped[str | None] = mapped_column(String(500))
+    banner_url: Mapped[str | None] = mapped_column(String(500))
+    description: Mapped[str | None] = mapped_column(String(1000))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     linked_accounts: Mapped[list["LinkedAccount"]] = relationship(

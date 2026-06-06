@@ -627,6 +627,79 @@ class PostgresService:
             )
             return [dict(row._mapping) for row in result]
 
+    async def get_user_achievement_breakdown(self, user_id: int) -> dict:
+        async with self._session() as session:
+            result = await session.execute(
+                text("""
+                    SELECT
+                        COUNT(*) AS total,
+                        COUNT(*) FILTER (WHERE a.global_unlock_percent < 2)   AS legendary,
+                        COUNT(*) FILTER (WHERE a.global_unlock_percent >= 2  AND a.global_unlock_percent < 10)  AS rare,
+                        COUNT(*) FILTER (WHERE a.global_unlock_percent >= 10 AND a.global_unlock_percent < 25)  AS uncommon,
+                        COUNT(*) FILTER (WHERE a.global_unlock_percent >= 25) AS common
+                    FROM user_achievements ua
+                    JOIN achievements a ON a.id = ua.achievement_id
+                    WHERE ua.user_id = :user_id
+                """),
+                {"user_id": user_id},
+            )
+            row = result.one()
+            perfect_result = await session.execute(
+                text("""
+                    SELECT COUNT(*) FROM (
+                        SELECT a.game_id
+                        FROM user_achievements ua
+                        JOIN achievements a ON a.id = ua.achievement_id
+                        WHERE ua.user_id = :user_id
+                        GROUP BY a.game_id
+                        HAVING COUNT(*) = (
+                            SELECT COUNT(*) FROM achievements a2 WHERE a2.game_id = a.game_id
+                        ) AND COUNT(*) > 0
+                    ) AS perfect_games
+                """),
+                {"user_id": user_id},
+            )
+            return {
+                "perfect": perfect_result.scalar_one(),
+                "legendary": row.legendary or 0,
+                "rare": row.rare or 0,
+                "uncommon": row.uncommon or 0,
+                "common": row.common or 0,
+                "total": row.total or 0,
+            }
+
+    async def get_user_guides(self, user_id: int, viewer_id: int | None = None) -> list[dict]:
+        async with self._session() as session:
+            result = await session.execute(
+                text("""
+                    SELECT gu.id, gu.user_id, gu.title, gu.description,
+                           gu.s3_key, gu.header_image_s3_key,
+                           gu.created_at, gu.updated_at,
+                           g.external_app_id AS app_id, g.name AS game_name,
+                           (gf.guide_id IS NOT NULL) AS is_favorite,
+                           (
+                               SELECT COUNT(*)
+                               FROM user_achievements ua
+                               JOIN achievements a ON a.id = ua.achievement_id
+                               WHERE ua.user_id = gu.user_id
+                                 AND a.game_id = gu.game_id
+                           ) AS author_achievement_count,
+                           (
+                               SELECT COUNT(*)
+                               FROM achievements a2
+                               WHERE a2.game_id = gu.game_id
+                           ) AS game_total_achievements
+                    FROM guides gu
+                    JOIN games g ON g.id = gu.game_id
+                    LEFT JOIN guide_favorites gf
+                           ON gf.guide_id = gu.id AND gf.user_id = :viewer_id
+                    WHERE gu.user_id = :user_id
+                    ORDER BY gu.created_at DESC
+                """),
+                {"user_id": user_id, "viewer_id": viewer_id},
+            )
+            return [dict(row._mapping) for row in result]
+
     async def add_guide_favorite(self, user_id: int, guide_id: int) -> None:
         async with self._session() as session:
             result = await session.execute(
