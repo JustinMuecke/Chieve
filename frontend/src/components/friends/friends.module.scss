@@ -310,3 +310,36 @@
     width: 100%;
   }
 }
+
+
+.iconButton {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+
+  font-size: 1.15rem;
+  text-decoration: none;
+
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.iconButton:hover {
+  background: rgba(199, 125, 255, 0.35);
+  border-color: #c77dff;
+  transform: translateY(-2px);
+}
+
+.iconButton svg {
+  display: block;
+}

@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import style from "./friends.module.scss";
 
+import { RxOpenInNewWindow } from "react-icons/rx";
+import { RiUserFollowLine, RiUserUnfollowLine } from "react-icons/ri";
+
 type FriendUser = {
   id: number;
   username: string;
@@ -235,32 +238,41 @@ function Friends() {
 
                 <div className={style.friendInfo}>
                   <h2>{user.username}</h2>
-                  <p>User ID {user.id}</p>
+                  
                 </div>
               </div>
 
               <div className={style.friendActions}>
-                <Link to={`/profile/${user.id}`} className={style.profileLink}>
-                  View profile
+                <Link
+                  to={`/profile/${user.id}`}
+                  className={style.iconButton}
+                  aria-label={`View profile of ${user.username}`}
+                  title="View profile"
+                >
+                  <RxOpenInNewWindow />
                 </Link>
 
                 {activeTab === "following" && (
                   <button
                     type="button"
-                    className={style.secondaryButton}
+                    className={style.iconButton}
                     onClick={() => handleUnfollow(user.id)}
+                    aria-label={`Unfollow ${user.username}`}
+                    title="Unfollow"
                   >
-                    Unfollow
+                    <RiUserUnfollowLine />
                   </button>
                 )}
 
                 {activeTab === "followers" && !isFollowing(user.id) && (
                   <button
                     type="button"
-                    className={style.primaryButton}
+                    className={style.iconButton}
                     onClick={() => handleFollow(user.id)}
+                    aria-label={`Follow ${user.username}`}
+                    title="Follow back"
                   >
-                    Follow back
+                    <RiUserFollowLine />
                   </button>
                 )}
 
