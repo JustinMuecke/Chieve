@@ -9,11 +9,17 @@ from src.models.achievement import (
     Achievement,
     Game,
     Guide,
+    GuideFavorite,
     UserAchievement,
     UserMilestone,
     UserProfileStats,
 )
-from src.models.errors import GuideForbiddenError, GuideNotFoundError
+from src.models.errors import (
+    GuideFavoriteAlreadyExistsError,
+    GuideFavoriteNotFoundError,
+    GuideForbiddenError,
+    GuideNotFoundError,
+)
 
 
 class PostgresService:
@@ -535,18 +541,55 @@ class PostgresService:
             await session.commit()
             return guide
 
-    async def get_guides_for_game(self, external_app_id: int) -> list[dict]:
+    async def get_guides_for_game(
+        self, external_app_id: int, user_id: int | None = None
+    ) -> list[dict]:
         async with self._session() as session:
             result = await session.execute(
                 text("""
                     SELECT gu.id, gu.user_id, gu.title, gu.s3_key,
                            gu.created_at, gu.updated_at,
-                           g.external_app_id AS app_id, g.name AS game_name
+                           g.external_app_id AS app_id, g.name AS game_name,
+                           (gf.guide_id IS NOT NULL) AS is_favorite
                     FROM guides gu
                     JOIN games g ON g.id = gu.game_id
+                    LEFT JOIN guide_favorites gf
+                           ON gf.guide_id = gu.id AND gf.user_id = :user_id
                     WHERE g.external_app_id = :app_id
                     ORDER BY gu.created_at DESC
                 """),
-                {"app_id": external_app_id},
+                {"app_id": external_app_id, "user_id": user_id},
             )
             return [dict(row._mapping) for row in result]
+
+    async def add_guide_favorite(self, user_id: int, guide_id: int) -> None:
+        async with self._session() as session:
+            result = await session.execute(
+                select(Guide).where(Guide.id == guide_id)
+            )
+            if not result.scalar_one_or_none():
+                raise GuideNotFoundError(f"Guide {guide_id} not found")
+            existing = await session.execute(
+                select(GuideFavorite).where(
+                    GuideFavorite.user_id == user_id,
+                    GuideFavorite.guide_id == guide_id,
+                )
+            )
+            if existing.scalar_one_or_none():
+                raise GuideFavoriteAlreadyExistsError()
+            session.add(GuideFavorite(user_id=user_id, guide_id=guide_id))
+            await session.commit()
+
+    async def remove_guide_favorite(self, user_id: int, guide_id: int) -> None:
+        async with self._session() as session:
+            result = await session.execute(
+                select(GuideFavorite).where(
+                    GuideFavorite.user_id == user_id,
+                    GuideFavorite.guide_id == guide_id,
+                )
+            )
+            favorite = result.scalar_one_or_none()
+            if not favorite:
+                raise GuideFavoriteNotFoundError()
+            await session.delete(favorite)
+            await session.commit()

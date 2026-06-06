@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useGameFeed } from "../../api/feed";
 import type { AchievementDetail, FeedUserEntry } from "../../api/types";
-import style from "./gameDetails.module.scss";
+import style from "./gamesDetails.module.scss";
 
 import GuidesTab from "../guides/GuidesTab";
 
@@ -154,31 +154,6 @@ function FeedTab({ appId }: { appId: string | undefined }) {
         );
       })}
     </div>
-  );
-}
-
-// ── Guides tab ────────────────────────────────────────────────────────────────
-
-function GuidesTab() {
-  return (
-    <section className={style.guidesSection}>
-      <div className={style.guidesHeader}>
-        <div>
-          <h3>Guides</h3>
-          <p>
-            Write your own guides, edit them later, and mark useful community
-            guides as favorites.
-          </p>
-        </div>
-
-        <button className={style.primaryBtn}>+ Create guide</button>
-      </div>
-
-      <div className={style.guidePlaceholder}>
-        <p>No guides yet.</p>
-        <p>Create the first guide and become dangerously helpful.</p>
-      </div>
-    </section>
   );
 }
 

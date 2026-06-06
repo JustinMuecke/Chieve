@@ -6,6 +6,8 @@ from src.dependencies.auth import get_current_user_id, get_optional_user_id
 from src.dependencies.services import get_services
 from src.models.errors import (
     GameNotFoundError,
+    GuideFavoriteAlreadyExistsError,
+    GuideFavoriteNotFoundError,
     GuideForbiddenError,
     GuideNotFoundError,
     UserServiceError,
@@ -24,6 +26,7 @@ def _to_response(row: dict, username: str | None, content_url: str) -> GuideResp
         game_name=row["game_name"],
         title=row["title"],
         content_url=content_url,
+        is_favorite=bool(row.get("is_favorite", False)),
         created_at=row["created_at"],
         updated_at=row["updated_at"],
     )
@@ -35,7 +38,7 @@ async def list_guides(
     services=Depends(get_services),
     user_id: int | None = Depends(get_optional_user_id),
 ):
-    rows = await services.postgres.get_guides_for_game(app_id)
+    rows = await services.postgres.get_guides_for_game(app_id, user_id=user_id)
 
     if not rows:
         return GameGuidesResponse(app_id=app_id, game_name="", my_guides=[], other_guides=[])
@@ -136,3 +139,29 @@ async def update_guide(
         created_at=guide.created_at,
         updated_at=guide.updated_at,
     )
+
+
+@router.post("/guides/{guide_id}/favorite", status_code=204)
+async def add_favorite(
+    guide_id: int,
+    services=Depends(get_services),
+    user_id: int = Depends(get_current_user_id),
+):
+    try:
+        await services.postgres.add_guide_favorite(user_id=user_id, guide_id=guide_id)
+    except GuideNotFoundError:
+        raise HTTPException(status_code=404, detail="Guide not found")
+    except GuideFavoriteAlreadyExistsError:
+        raise HTTPException(status_code=409, detail="Already favorited")
+
+
+@router.delete("/guides/{guide_id}/favorite", status_code=204)
+async def remove_favorite(
+    guide_id: int,
+    services=Depends(get_services),
+    user_id: int = Depends(get_current_user_id),
+):
+    try:
+        await services.postgres.remove_guide_favorite(user_id=user_id, guide_id=guide_id)
+    except GuideFavoriteNotFoundError:
+        raise HTTPException(status_code=404, detail="Favorite not found")
