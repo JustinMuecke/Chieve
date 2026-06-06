@@ -1,0 +1,260 @@
+.feedSection {
+  margin: 0 32px 28px 32px;
+  padding: 24px;
+
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(199, 125, 255, 0.16);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+
+  margin-bottom: 20px;
+}
+
+.kicker {
+  margin: 0 0 6px 0;
+
+  color: #caa7ff;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.userHint {
+  padding: 7px 10px;
+
+  border-radius: 999px;
+  background: rgba(199, 125, 255, 0.12);
+  border: 1px solid rgba(199, 125, 255, 0.24);
+
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.feedList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.feedItem {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 14px;
+
+  padding: 18px;
+
+  border-radius: 18px;
+  background: rgba(20, 16, 28, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  transition: 0.2s ease;
+}
+
+.feedItem:hover {
+  transform: translateY(-2px);
+  border-color: rgba(199, 125, 255, 0.32);
+}
+
+.activityIcon {
+  width: 44px;
+  height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 14px;
+  background: rgba(199, 125, 255, 0.16);
+  border: 1px solid rgba(199, 125, 255, 0.22);
+
+  font-size: 1.3rem;
+}
+
+.activityMain {
+  min-width: 0;
+}
+
+.activityTopRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+
+  margin-bottom: 8px;
+}
+
+.activityLabel {
+  color: #caa7ff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.activityDate {
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.activityContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.activityContent h3 {
+  margin: 0 0 4px 0;
+
+  font-size: 1rem;
+  color: white;
+}
+
+.activityContent p {
+  margin: 0;
+
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.88rem;
+}
+
+.activityContent a {
+  color: #d8b4ff;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.activityContent a:hover {
+  text-decoration: underline;
+}
+
+.badgeGroup {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.badgeGroup span,
+.perfectBadge,
+.guideBadge,
+.favoriteBadge,
+.followBadge {
+  min-height: 28px;
+  padding: 0 10px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 999px;
+
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.badgeGroup span {
+  background: rgba(199, 125, 255, 0.12);
+  color: #d8b4ff;
+  border: 1px solid rgba(199, 125, 255, 0.24);
+}
+
+.perfectBadge {
+  background: rgba(199, 125, 255, 0.18);
+  color: #d8b4ff;
+  border: 1px solid rgba(199, 125, 255, 0.32);
+}
+
+.guideBadge {
+  background: rgba(59, 130, 246, 0.16);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.28);
+}
+
+.favoriteBadge {
+  background: rgba(250, 204, 21, 0.16);
+  color: #facc15;
+  border: 1px solid rgba(250, 204, 21, 0.28);
+}
+
+.followBadge {
+  background: rgba(34, 197, 94, 0.14);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.26);
+}
+
+.userMini {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.userMini img,
+.userMini > div:first-child {
+  width: 38px;
+  height: 38px;
+
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.userMini img {
+  object-fit: cover;
+}
+
+.userMini > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(199, 125, 255, 0.35);
+
+  font-weight: 900;
+}
+
+.emptyState {
+  padding: 32px;
+
+  text-align: center;
+
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px dashed rgba(199, 125, 255, 0.25);
+
+  color: rgba(255, 255, 255, 0.58);
+}
+
+@media (max-width: 700px) {
+  .feedSection {
+    margin: 0 18px 22px 18px;
+    padding: 18px;
+  }
+
+  .header,
+  .activityContent,
+  .activityTopRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .feedItem {
+    grid-template-columns: 1fr;
+  }
+
+  .badgeGroup {
+    justify-content: flex-start;
+  }
+}
