@@ -1,5 +1,4 @@
 import Games from '../components/games/Games';
-import React  from 'react';  
 
 function GamesPage() {
     

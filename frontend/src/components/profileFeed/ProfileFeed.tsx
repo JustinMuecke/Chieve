@@ -103,10 +103,6 @@ function ProfileFeed({ userId }: ProfileFeedProps) {
   }, [userId]);
 
   const timeline = feed ? buildTimeline(feed) : [];
-  const totalUnlocks = timeline.reduce(
-    (s, d) => s + d.games.reduce((gs, g) => gs + g.achievements.length, 0),
-    0
-  );
 
   if (isLoading) return <div className={style.emptyState}>Loading feed…</div>;
   if (error) return <div className={style.emptyState}>{error}</div>;
