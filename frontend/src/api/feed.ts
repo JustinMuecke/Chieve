@@ -15,7 +15,7 @@ export function useGameFeed(appId: string | undefined) {
   });
 }
 
-export function useFriendsFeed(days = 14) {
+export function useFriendsFeed(days = 90) {
   return useQuery<FeedResponse>({
     queryKey: ['feed', 'friends', days],
     queryFn: async () => {
