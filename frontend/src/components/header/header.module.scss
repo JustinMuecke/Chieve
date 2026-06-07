@@ -28,8 +28,8 @@
 }
 
 .logo {
-  width: 36px;
-  height: 36px;
+  width: 60px;
+  height: 60px;
   object-fit: contain;
   border-radius: 6px;
   filter: drop-shadow(0 0 6px rgba(200, 120, 255, 0.45));
@@ -64,33 +64,37 @@
   align-items: center;
 }
 
-.nav {
-  display: flex;
-  align-items: center;
-  margin: 0;
-}
-
 .nav a {
-  padding: 0 14px;
+  width: 56px;
   height: 64px;
+
   display: inline-flex;
   align-items: center;
+  justify-content: center;
 
   color: rgba(255, 255, 255, 0.48);
-  font-size: 0.88rem;
-  font-weight: 600;
+  font-size: 1.35rem;
   text-decoration: none;
 
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
 
-  transition: color 0.15s ease, border-color 0.15s ease;
+  transition: color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 
   &:hover {
     color: rgba(255, 255, 255, 0.9);
     border-bottom-color: rgba(199, 125, 255, 0.45);
+    transform: translateY(-1px);
   }
 }
+
+.nav a svg {
+  display: block;
+  color: currentColor;
+}
+
+
+
 
 // ── Back button ───────────────────────────────────────────────────────────────
 
@@ -186,6 +190,9 @@
 
 // ── Dropdown ──────────────────────────────────────────────────────────────────
 
+
+
+
 .dropdown {
   position: absolute;
   top: calc(100% + 8px);
@@ -203,18 +210,23 @@
   flex-direction: column;
   padding: 4px;
 }
-
 .dropdownItem {
-  display: block;
   width: 100%;
   padding: 9px 12px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
   border: none;
   border-radius: 6px;
   background: transparent;
   color: rgba(255, 255, 255, 0.75);
+
   font-size: 0.88rem;
   font-weight: 500;
   text-align: left;
+
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
 
@@ -223,6 +235,17 @@
     color: white;
   }
 }
+
+.dropdownItem svg {
+  flex-shrink: 0;
+  font-size: 1.1rem;
+  color: currentColor;
+}
+
+.dropdownItem span {
+  color: currentColor;
+}
+
 
 .dropdownDivider {
   border: none;
