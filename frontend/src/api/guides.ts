@@ -1,5 +1,31 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { GameGuidesResponse } from './types';
+import type { GameGuidesResponse, GuideWithOwner } from './types';
+
+export interface AllGuidesResponse {
+  page: number;
+  page_size: number;
+  total: number;
+  guides: GuideWithOwner[];
+}
+
+export function useAllGuides(params: {
+  appId?: number;
+  sortBy?: 'favorites' | 'recent';
+  order?: 'asc' | 'desc';
+  page?: number;
+} = {}) {
+  const { appId, sortBy = 'favorites', order = 'desc', page = 1 } = params;
+  const search = new URLSearchParams({ sort_by: sortBy, order, page: String(page) });
+  if (appId !== undefined) search.set('app_id', String(appId));
+  return useQuery<AllGuidesResponse>({
+    queryKey: ['guides', 'all', appId, sortBy, order, page],
+    queryFn: async () => {
+      const res = await fetch(`/api/achievements/guides?${search}`, { credentials: 'include' });
+      if (!res.ok) throw new Error(`${res.status}`);
+      return res.json();
+    },
+  });
+}
 
 async function fetchJson<T>(url: string): Promise<T> {
   const res = await fetch(url, { credentials: 'include' });
@@ -77,6 +103,19 @@ export function useUpdateGuide(appId: string | undefined) {
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['guides', appId] }),
   });
+}
+
+export async function uploadGuideImage(file: File): Promise<string> {
+  const form = new FormData();
+  form.append('file', file);
+  const res = await fetch('/api/achievements/guides/images', {
+    method: 'POST',
+    credentials: 'include',
+    body: form,
+  });
+  if (!res.ok) throw new Error(`${res.status}`);
+  const data = await res.json();
+  return data.url as string;
 }
 
 export function useToggleFavorite(appId: string | undefined) {

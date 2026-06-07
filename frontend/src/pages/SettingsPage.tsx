@@ -168,6 +168,21 @@ function SettingsPage() {
             </a>
           )}
         </div>
+
+        {hasSteam && (
+          <div className={style.syncRow}>
+            <button
+              type="button"
+              className={`${style.syncBtn} ${isRunning ? style.syncRunning : ''} ${isFailed ? style.syncFailed : ''}`}
+              onClick={trigger}
+              disabled={isRunning || isRateLimited}
+              title={isRateLimited ? 'You can sync once every 15 minutes' : 'Sync your Steam achievements'}
+            >
+              <span className={`${style.syncIcon} ${isRunning ? style.spinning : ''}`}>↻</span>
+              <span>{syncLabel}</span>
+            </button>
+          </div>
+        )}
       </section>
       {/* ── Profile ─────────────────────────────────────────────── */}
       <section className={style.section}>
@@ -233,40 +248,6 @@ function SettingsPage() {
           )}
         </div>
       </section>
-   {/* ──  Sync ─────────────────────────────────────────── */}
-    <div className={style.syncPanel}>
-          <div>
-            <h2>Steam achievement sync</h2>
-            <p>
-              Refresh your achievements, unlocked games, and progress data.
-              Syncing may be rate limited.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            className={`${style.syncBtn} ${
-              isRunning ? style.syncRunning : ""
-            } ${isFailed ? style.syncFailed : ""}`}
-            onClick={trigger}
-            disabled={isRunning || isRateLimited}
-            title={
-              isRateLimited
-                ? "You can sync once every 15 minutes"
-                : "Sync your Steam achievements"
-            }
-          >
-            <span
-              className={`${style.syncIcon} ${
-                isRunning ? style.spinning : ""
-              }`}
-            >
-              ↻
-            </span>
-            <span>{syncLabel}</span>
-          </button>
-        </div>
-
     </div>
 
   );

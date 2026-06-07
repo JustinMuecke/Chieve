@@ -167,7 +167,7 @@ function Friends() {
           </p>
         </div>
 
-        <div className={style.socialStats}>
+        <div className={style.statsBox}>
           <article>
             <strong>{following.length}</strong>
             <span>Following</span>

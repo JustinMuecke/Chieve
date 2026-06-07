@@ -173,6 +173,7 @@ class GuideResponse(BaseModel):
     content_url: str
     header_image_url: str | None = None
     is_favorite: bool = False
+    favorite_count: int = 0
     author_achievement_count: int = 0
     game_total_achievements: int = 0
     created_at: datetime

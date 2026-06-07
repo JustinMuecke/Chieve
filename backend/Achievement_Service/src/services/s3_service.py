@@ -49,8 +49,21 @@ class S3Service:
     def get_url(self, key: str) -> str:
         return f"{self._public_url}/{self.BUCKET}/{key}"
 
+    async def upload_inline_image(self, key: str, content: bytes, content_type: str) -> str:
+        async with self._client() as s3:
+            await s3.put_object(
+                Bucket=self.BUCKET,
+                Key=key,
+                Body=content,
+                ContentType=content_type,
+            )
+        return self.get_url(key)
+
     def guide_key(self, user_id: int, guide_id: str) -> str:
         return f"{user_id}/{guide_id}.md"
 
     def header_image_key(self, user_id: int, guide_id: str) -> str:
         return f"{user_id}/{guide_id}_header"
+
+    def inline_image_key(self, user_id: int, image_uuid: str) -> str:
+        return f"{user_id}/inline/{image_uuid}"

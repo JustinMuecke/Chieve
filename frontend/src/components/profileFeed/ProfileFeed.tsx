@@ -160,8 +160,7 @@ function ProfileFeed({ userId }: ProfileFeedProps) {
                 {day.guides.map((guide) => (
                   <Link
                     key={`guide-${guide.guide_id}`}
-                    to={`/games/${guide.app_id}`}
-                    state={{ tab: "guides", guideId: guide.guide_id }}
+                    to={`/games/${guide.app_id}/guides/${guide.guide_id}`}
                     className={style.guideBlock}
                   >
                     <div className={style.guideIcon}>📖</div>
