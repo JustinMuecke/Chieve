@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   fetchRecommendations,
@@ -24,6 +24,15 @@ function RecommendCard({
   depth: number;
   anchorGameName: string | null;
 }) {
+  const [descExpanded, setDescExpanded] = useState(false);
+  const [descTruncated, setDescTruncated] = useState(false);
+  const descRef = useRef<HTMLParagraphElement>(null);
+
+  useLayoutEffect(() => {
+    const el = descRef.current;
+    if (el) setDescTruncated(el.scrollHeight > el.clientHeight);
+  }, []);
+
   const depthClass = depth === 0 ? '' : depth === 1 ? style.cardDepth1 : style.cardDepth2;
   const exitClass = exitDir === 'left' ? style.exitLeft : exitDir === 'right' ? style.exitRight : '';
 
@@ -32,7 +41,8 @@ function RecommendCard({
 
       {depth === 0 && anchorGameName && (
         <div className={style.cardHeader}>
-          Similar to <strong>{anchorGameName}</strong>
+          <span>Similar to <strong>{anchorGameName}</strong></span>
+          <span className={style.matchText}>{Math.round(item.similarity_score * 100)}% match</span>
         </div>
       )}
 
@@ -43,9 +53,6 @@ function RecommendCard({
         <div className={style.cardImageOverlay} />
         <div className={style.cardBannerBottom}>
           <h2 className={style.cardTitle}>{item.name}</h2>
-          {depth === 0 && (
-            <span className={style.matchText}>{Math.round(item.similarity_score * 100)}% match</span>
-          )}
         </div>
       </div>
 
@@ -61,7 +68,23 @@ function RecommendCard({
 
       <div className={style.cardBody}>
         {item.description && (
-          <p className={style.cardDescription}>{item.description}</p>
+          <div className={style.descriptionBox}>
+            <p
+              ref={descRef}
+              className={`${style.cardDescription} ${descExpanded ? style.cardDescriptionExpanded : ''}`}
+            >
+              {item.description}
+            </p>
+            {(descTruncated || descExpanded) && (
+              <button
+                type="button"
+                className={style.descToggle}
+                onClick={e => { e.stopPropagation(); setDescExpanded(v => !v); }}
+              >
+                {descExpanded ? 'Show less' : 'Show more'}
+              </button>
+            )}
+          </div>
         )}
 
         <div className={style.cardMeta}>

@@ -31,6 +31,7 @@ function ProfileGuides({ userId }: ProfileGuidesProps) {
   }, [userId]);
 
   const favoriteCount = guides.filter((g) => g.is_favorite).length;
+  const gamesCovered = new Set(guides.map((g: UserGuide) => g.app_id)).size;
 
   const sortedGuides = [...guides].sort((a, b) =>
     sort === "alphabetical"
@@ -53,8 +54,8 @@ function ProfileGuides({ userId }: ProfileGuidesProps) {
           <p>Favorites</p>
         </article>
         <article>
-          <span>{guides.length > 0 ? guides[0].game_name : "—"}</span>
-          <p>Latest game</p>
+          <span>{gamesCovered}</span>
+          <p>Games covered</p>
         </article>
       </div>
 

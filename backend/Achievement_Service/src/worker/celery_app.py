@@ -24,10 +24,14 @@ celery_app.conf.update(
 celery_app.conf.beat_schedule = {
     "backfill-game-descriptions": {
         "task": "backfill_game_descriptions",
-        "schedule": crontab(hour=2, minute=0),  # nightly at 2 AM UTC
+        "schedule": crontab(hour=2, minute=0),
+    },
+    "backfill-game-tags": {
+        "task": "backfill_game_tags",
+        "schedule": crontab(hour=3, minute=0),
     },
     "refresh-community-points": {
         "task": "refresh_community_points",
-        "schedule": crontab(hour=4, minute=0),  # nightly at 4 AM UTC
+        "schedule": crontab(hour=4, minute=0),
     },
 }

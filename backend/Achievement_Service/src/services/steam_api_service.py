@@ -143,6 +143,23 @@ class SteamApiService:
         tags = [g["description"] for g in genres if g.get("description")] or None
         return {"description": description, "tags": tags}
 
+    async def get_steamspy_tags(self, app_id: int) -> list[str] | None:
+        """Returns top user-defined tags from SteamSpy, sorted by vote count."""
+        try:
+            async with httpx.AsyncClient(timeout=10) as client:
+                resp = await client.get(
+                    "https://steamspy.com/api.php",
+                    params={"request": "appdetails", "appid": app_id},
+                )
+                resp.raise_for_status()
+        except httpx.HTTPError:
+            return None
+        tags_dict = resp.json().get("tags", {})
+        if not tags_dict:
+            return None
+        sorted_tags = sorted(tags_dict.items(), key=lambda x: x[1], reverse=True)
+        return [tag for tag, _ in sorted_tags[:10]] or None
+
     def parse_unlock_time(self, unlocktime: int) -> datetime | None:
         if not unlocktime:
             return None

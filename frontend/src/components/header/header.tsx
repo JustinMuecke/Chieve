@@ -43,7 +43,7 @@ function ProfileDropdown() {
 
       {open && (
         <div className={style.dropdown}>
-          <button className={style.dropdownItem} onClick={() => { navigate("/profile"); setOpen(false); }}>
+          <button className={style.dropdownItem} onClick={() => { navigate(`/profile/${user.id}`); setOpen(false); }}>
             Visit Profile
           </button>
           <button className={style.dropdownItem} onClick={() => { navigate("/friends"); setOpen(false); }}>

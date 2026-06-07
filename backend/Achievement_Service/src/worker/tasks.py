@@ -88,6 +88,27 @@ async def _backfill_game_descriptions():
         await asyncio.sleep(1.0)
 
 
+@celery_app.task(name="backfill_game_tags")
+def backfill_game_tags_task():
+    asyncio.run(_backfill_game_tags())
+
+
+async def _backfill_game_tags():
+    """Fetches rich user-defined tags from SteamSpy for all games. 1 req/sec."""
+    pg = _make_postgres()
+    api = SteamApiService()
+
+    app_ids = await pg.get_all_game_app_ids()
+    for app_id in app_ids:
+        try:
+            tags = await api.get_steamspy_tags(app_id)
+            if tags:
+                await pg.update_game_store_details(app_id, description=None, tags=tags)
+        except Exception:
+            pass
+        await asyncio.sleep(1.0)
+
+
 @celery_app.task(name="refresh_community_points")
 def refresh_community_points_task():
     asyncio.run(_refresh_community_points())

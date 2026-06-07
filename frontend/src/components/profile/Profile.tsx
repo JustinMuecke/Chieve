@@ -6,6 +6,7 @@ import ProfileFeed from "../profileFeed/ProfileFeed";
 
 import ProfileGuides from "../profileGuides/ProfileGuides";
 import ProfileGames from "../profileGames/ProfileGames";
+import ProfileStats from "../profileStats/ProfileStats";
 
 
 import {
@@ -23,7 +24,7 @@ import {
 
 
 
-type ProfileSection = "feed" | "guides" | "games";
+type ProfileSection = "feed" | "guides" | "games" | "stats";
 type AchievementType = keyof AchievementStats;
 
 type AchievementItem = {
@@ -305,6 +306,16 @@ function Profile() {
           >
             Games
           </button>
+
+          <button
+            type="button"
+            className={`${style.profileNavButton} ${
+              activeSection === "stats" ? style.profileNavButtonActive : ""
+            }`}
+            onClick={() => setActiveSection("stats")}
+          >
+            Stats
+          </button>
         </div>
 
         <section className={style.profileSectionContent}>
@@ -313,6 +324,8 @@ function Profile() {
           {activeSection === "guides" && <ProfileGuides userId={profile.user_id} />}
 
           {activeSection === "games" && <ProfileGames userId={profile.user_id} />}
+
+          {activeSection === "stats" && <ProfileStats userId={String(profile.user_id)} />}
         </section>
       </section>
     </main>

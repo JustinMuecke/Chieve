@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from pydantic import BaseModel
 
 
@@ -222,3 +222,14 @@ class MilestoneEntry(BaseModel):
     achievement_id: int | None
     achievement_name: str | None
     achieved_at: datetime
+
+
+class StatsTimelineEntry(BaseModel):
+    date: date
+    daily_achievements: int
+    daily_points: int
+    cumulative_points: int
+
+
+class StatsResponse(BaseModel):
+    timeline: list[StatsTimelineEntry]

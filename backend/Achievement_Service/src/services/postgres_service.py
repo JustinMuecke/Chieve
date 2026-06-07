@@ -64,6 +64,49 @@ class PostgresService:
                 game.tags = tags
             await session.commit()
 
+    async def get_all_game_app_ids(self) -> list[int]:
+        """Returns external_app_ids of all games."""
+        async with self._session() as session:
+            result = await session.execute(select(Game.external_app_id))
+            return [row[0] for row in result]
+
+    async def get_user_stats_timeline(self, user_id: int) -> list[dict]:
+        """Returns daily achievement/points data for the last 12 months with cumulative points."""
+        async with self._session() as session:
+            result = await session.execute(
+                text("""
+                    WITH daily AS (
+                        SELECT
+                            DATE(ua.unlocked_at AT TIME ZONE 'UTC') AS date,
+                            COUNT(*)::int                            AS daily_achievements,
+                            COALESCE(SUM(a.global_points), 0)::int  AS daily_points
+                        FROM user_achievements ua
+                        JOIN achievements a ON a.id = ua.achievement_id
+                        WHERE ua.user_id = :user_id
+                          AND ua.unlocked_at >= NOW() - INTERVAL '12 months'
+                          AND ua.unlocked_at IS NOT NULL
+                        GROUP BY DATE(ua.unlocked_at AT TIME ZONE 'UTC')
+                    )
+                    SELECT
+                        date,
+                        daily_achievements,
+                        daily_points,
+                        SUM(daily_points) OVER (ORDER BY date)::int AS cumulative_points
+                    FROM daily
+                    ORDER BY date
+                """),
+                {"user_id": user_id},
+            )
+            return [
+                {
+                    "date": row.date,
+                    "daily_achievements": row.daily_achievements,
+                    "daily_points": row.daily_points,
+                    "cumulative_points": row.cumulative_points,
+                }
+                for row in result
+            ]
+
     async def get_games_missing_descriptions(self) -> list[int]:
         """Returns external_app_ids of all games with no description yet."""
         async with self._session() as session:

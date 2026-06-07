@@ -22,10 +22,12 @@ def _make_postgres() -> PostgresService:
 
 def _build_text(name: str, description: str | None, tags: list[str] | None) -> str:
     parts = [name]
+    if tags:
+        tag_text = " ".join(tags)
+        parts.append(tag_text)  # tags first, before description
+        parts.append(tag_text)  # repeated for extra weight
     if description:
         parts.append(description)
-    if tags:
-        parts.append(" ".join(tags))
     return " ".join(parts).strip()
 
 
