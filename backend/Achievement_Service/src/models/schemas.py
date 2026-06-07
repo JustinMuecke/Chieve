@@ -196,6 +196,22 @@ class UserAchievementBreakdown(BaseModel):
     total: int
 
 
+# ── Internal (Recommendation Service) ────────────────────────────────────────
+
+class GameInternalDetail(BaseModel):
+    app_id: int
+    name: str
+    header_image_url: str | None
+    description: str | None
+    tags: list[str] | None
+    achievement_count: int
+
+
+class UserGameCompletion(BaseModel):
+    app_id: int
+    completion_pct: float
+
+
 # ── Milestones ────────────────────────────────────────────────────────────────
 
 class MilestoneEntry(BaseModel):

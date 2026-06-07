@@ -12,7 +12,8 @@ Chieve/
 │   ├── .env                      # Shared infra secrets (Postgres, MinIO, JWT_SECRET)
 │   ├── docs/design.md            # Full technical design doc — read before making architectural decisions
 │   ├── User_Service/             # FastAPI, port 8000
-│   └── Achievement_Service/      # FastAPI, port 8001
+│   ├── Achievement_Service/      # FastAPI, port 8001
+│   └── Recommendation_Service/   # FastAPI, port 8002
 └── frontend/                     # Vite + React 19 + TypeScript, port 5173
 ```
 
@@ -222,6 +223,7 @@ mv_community_points  [MATERIALIZED VIEW — refreshed daily by Celery]
 - `e4f5a6b7c8d9` — rename `content` to `s3_key` in guides
 - `f5a6b7c8d9e0` — add guide_favorites table
 - `g6a7b8c9d0e1` — add `description` and `header_image_s3_key` to guides
+- `h7b8c9d0e1f2` — add `description` and `tags` columns to `games`
 
 **Environment:**
 ```
@@ -264,31 +266,80 @@ Vite + React 19 + TypeScript. CSS Modules (SCSS). React Query (`@tanstack/react-
 
 ---
 
-## Planned Features
+---
 
-### Game Recommendation System
+## Recommendation Service (`backend/Recommendation_Service/`)
 
-**Not yet implemented.** Design agreed upon:
+**Responsibility:** Game recommendations via pgvector similarity, wishlist management, and recommendation dismissals. Calls Achievement Service internal API for all game/user data — no direct DB reads from other services.
 
-**Goal:** Suggest games the user doesn't own based on what they've played.
+**Key routes** (`/api/recommendations/`):
+- `GET /` → `RecommendationsResponse` — get personalised game recommendations (weighted random anchor + cosine similarity)
+- `POST /dismiss/{app_id}` → 204 — dismiss a game (never show again)
+- `GET /wishlist` → `WishlistResponse` — user's saved games
+- `POST /wishlist/{app_id}` → 201 — add to wishlist (triggered on swipe-right)
+- `DELETE /wishlist/{app_id}` → 204 — remove from wishlist
 
-**Embedding approach:**
-- Use `sentence-transformers` (`all-MiniLM-L6-v2`, 384-dim) to embed game descriptions — tags alone are too coarse and often misleading across genres
-- Store embeddings with `pgvector` (`vector(384)` column on `games` or separate `game_embeddings` table)
-- Embeddings are generated as a Celery task when new games are synced (best-effort, non-blocking)
+**DB tables (owned by this service):**
+```
+game_embeddings (app_id [PK], embedding vector(384), updated_at)
+wishlist (user_id [PK], app_id [PK], added_at)
+recommendation_dismissals (user_id [PK], app_id [PK], dismissed_at)
+```
 
-**Recommendation logic (mix of two strategies):**
-1. **Random anchor + nearest neighbor:** Pick a random game from the user's library, weighted by `completion_pct × recency_decay`. Find the K nearest games (cosine similarity via pgvector) the user doesn't own yet.
-2. **Average anchor:** Average all the user's game vectors, find nearest unowned games.
-- Strategy 1 is preferred — averaging risks a bland centroid that matches nothing well.
+All tables use `app_id` (Steam external app ID, not internal `games.id`) so the service can operate independently of Achievement Service's internal IDs if DBs are ever split.
 
-**Proposed route:** `GET /api/achievements/recommendations` → `[{ app_id, name, header_image_url, similarity_score }]`
+**Embedding generation:**
+- Model: `all-MiniLM-L6-v2` (384-dim, via `sentence-transformers`)
+- Input: `"{name}. {description} {tags joined}"` for each game
+- Celery beat task `generate_embeddings` runs hourly, fetches games without embeddings from Achievement Service, generates and stores them
+- Model is pre-downloaded in Dockerfile to avoid cold start delay
 
-**Infrastructure needed:**
-- `pgvector` extension enabled in Postgres (add to `minio-init` or a separate init container)
-- `sentence-transformers` added to Achievement Service dependencies
-- New Alembic migration to add `embedding vector(384)` to `games`
-- New Celery task: `generate_game_embedding(game_id)` — called after upsert when embedding is missing
+**Recommendation logic:**
+1. Fetch in parallel: owned game IDs, user completion %, dismissed IDs, wishlisted IDs
+2. Weighted random anchor: pick a game from user's library, weighted by `completion_pct` (higher completion = more likely)
+3. Query `game_embeddings` for K nearest neighbours by cosine similarity (`<=>` operator), excluding all owned/dismissed/wishlisted games
+4. Fetch game details for results from Achievement Service internal API
+5. Return sorted by similarity score
+
+**pgvector:**
+- Extension enabled via first Alembic migration (`CREATE EXTENSION IF NOT EXISTS vector`)
+- Requires `pgvector/pgvector:pg16` Docker image (already set in `docker-compose.yml`)
+- Cosine distance query: `embedding <=> :embedding::vector`
+- Embeddings passed as formatted strings `[x1,x2,...]` and cast with `::vector`
+
+**Achievement Service internal API used:**
+- `GET /internal/owned-app-ids/{user_id}` — exclude from recommendations
+- `GET /internal/games?app_ids=440,730` — game details for response building
+- `GET /internal/games?limit=N&offset=N` — paginated games for embedding generation
+- `GET /internal/user-game-completion/{user_id}` — completion % for anchor selection
+
+**Alembic:**
+- Version table: `recommendation_alembic_version`
+- Single initial migration: `a1b2c3d4e5f6`
+
+**Environment:**
+```
+POSTGRES_HOST, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
+JWT_SECRET   # must match other services
+REDIS_URL    # redis://redis:6379/0
+ACHIEVEMENT_SERVICE_URL  # http://achievement_service:8001
+```
+
+**Celery worker:**
+- Combined worker+beat in one container (`celery ... worker --beat`)
+- `generate_embeddings` task — hourly cron, idempotent (skips already-embedded games)
+
+---
+
+## Achievement Service — internal routes added for Recommendation Service
+
+- `GET /internal/owned-app-ids/{user_id}` → `list[int]` (external Steam app IDs the user has synced)
+- `GET /internal/games?app_ids=1,2&limit=100&offset=0` → `list[GameInternalDetail]`
+- `GET /internal/user-game-completion/{user_id}` → `list[UserGameCompletion]` — `{app_id, completion_pct}`
+
+The `games` table also has two new columns added (migration `h7b8c9d0e1f2`):
+- `description TEXT` — Steam Store short description, fetched on first sync (best-effort)
+- `tags TEXT[]` — Steam genre tags, fetched on first sync (best-effort)
 
 ---
 

@@ -15,6 +15,7 @@ import Settings from "./pages/SettingsPage";
 
 import FriendsPage from "./pages/FriendsPage";
 import ProfilePage from "./pages/ProfilePage";
+import DiscoverPage from "./pages/DiscoverPage";
 
 function App() {
   const { data: user, isLoading, isError } = useMe();
@@ -37,6 +38,7 @@ function App() {
           <Route path="/ranking" element={<Ranglist />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/friends" element={<FriendsPage />} />
+          <Route path="/discover" element={<DiscoverPage />} />
         </Routes>
 
         <Footer />

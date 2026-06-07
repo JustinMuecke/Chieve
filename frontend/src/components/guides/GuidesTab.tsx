@@ -5,9 +5,10 @@ import GuideViewer from "./GuideViewer";
 
 type GuidesTabProps = {
   appId: string | undefined;
+  initialGuideId?: number;
 };
 
-function GuidesTab({ appId }: GuidesTabProps) {
+function GuidesTab({ appId, initialGuideId }: GuidesTabProps) {
   const [selectedGuide, setSelectedGuide] = useState<GuideWithOwner | null>(null);
 
   if (selectedGuide) {
@@ -20,7 +21,7 @@ function GuidesTab({ appId }: GuidesTabProps) {
     );
   }
 
-  return <GuideBrowser appId={appId} onReadGuide={setSelectedGuide} />;
+  return <GuideBrowser appId={appId} onReadGuide={setSelectedGuide} initialGuideId={initialGuideId} />;
 }
 
 export default GuidesTab;

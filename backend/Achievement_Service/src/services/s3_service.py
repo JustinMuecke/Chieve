@@ -46,6 +46,9 @@ class S3Service:
             content_type = response.get("ContentType", "application/octet-stream")
             return body, content_type
 
+    def get_url(self, key: str) -> str:
+        return f"{self._public_url}/{self.BUCKET}/{key}"
+
     def guide_key(self, user_id: int, guide_id: str) -> str:
         return f"{user_id}/{guide_id}.md"
 

@@ -1,15 +1,19 @@
 import { useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useSelectAvatar, useUploadCustomAvatar, useUnlinkPlatform } from '../api/user';
+import { useSelectAvatar, useUploadCustomAvatar, useUnlinkPlatform, useUpdateProfile, useUploadBanner } from '../api/user';
 import style from './settingsPage.module.scss';
 
 function SettingsPage() {
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
   const [confirmUnlink, setConfirmUnlink] = useState<string | null>(null);
+  const [description, setDescription] = useState(user.description ?? '');
   const selectAvatar = useSelectAvatar();
   const uploadAvatar = useUploadCustomAvatar();
   const unlinkPlatform = useUnlinkPlatform();
+  const updateProfile = useUpdateProfile();
+  const uploadBanner = useUploadBanner();
 
   const githubOption = user.avatar_options.find(o => o.source === 'github');
   const steamOption = user.avatar_options.find(o => o.source === 'steam');
@@ -25,11 +29,18 @@ function SettingsPage() {
     e.target.value = '';
   }
 
+  function handleBannerChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) uploadBanner.mutate(file);
+    e.target.value = '';
+  }
+
   const isAvatarBusy = selectAvatar.isPending || uploadAvatar.isPending;
 
   return (
     <div className={style.page}>
       <h2 className={style.pageTitle}>Settings</h2>
+
 
       {/* ── Profile Picture ─────────────────────────────────────── */}
       <section className={style.section}>
@@ -141,8 +152,74 @@ function SettingsPage() {
           )}
         </div>
       </section>
+      {/* ── Profile ─────────────────────────────────────────────── */}
+      <section className={style.section}>
+        <h3 className={style.sectionTitle}>Profile</h3>
+
+        <div className={style.bannerRow}>
+          <div
+            className={style.bannerPreview}
+            style={user.banner_url ? { backgroundImage: `url(${user.banner_url})` } : undefined}
+          >
+            {!user.banner_url && <span className={style.bannerPlaceholder}>No banner set</span>}
+            {uploadBanner.isPending && <div className={style.bannerOverlay}>Uploading…</div>}
+          </div>
+          <button
+            type="button"
+            className={style.uploadBannerBtn}
+            onClick={() => bannerInputRef.current?.click()}
+            disabled={uploadBanner.isPending}
+          >
+            {user.banner_url ? 'Change Banner' : 'Upload Banner'}
+          </button>
+          <input
+            ref={bannerInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleBannerChange}
+            hidden
+          />
+        </div>
+        {uploadBanner.isError && (
+          <p className={style.errorMsg}>Banner upload failed. Please try again.</p>
+        )}
+
+        <div className={style.descriptionRow}>
+          <label className={style.descriptionLabel} htmlFor="profile-description">
+            Description
+          </label>
+          <textarea
+            id="profile-description"
+            className={style.descriptionTextarea}
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+            placeholder="Tell people a bit about yourself…"
+            maxLength={1000}
+            rows={4}
+          />
+          <div className={style.descriptionFooter}>
+            <span className={style.charCount}>{description.length} / 1000</span>
+            <button
+              type="button"
+              className={style.saveBtn}
+              onClick={() => updateProfile.mutate(description || null)}
+              disabled={updateProfile.isPending}
+            >
+              {updateProfile.isPending ? 'Saving…' : 'Save'}
+            </button>
+          </div>
+          {updateProfile.isSuccess && (
+            <p className={style.successMsg}>Saved!</p>
+          )}
+          {updateProfile.isError && (
+            <p className={style.errorMsg}>Failed to save. Please try again.</p>
+          )}
+        </div>
+      </section>
     </div>
+    
   );
+  
 }
 
 export default SettingsPage;

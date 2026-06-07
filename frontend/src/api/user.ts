@@ -30,6 +30,49 @@ export function useUnlinkPlatform() {
   });
 }
 
+export function useUpdateProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (description: string | null) => {
+      const res = await fetch('/api/user/me/profile', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description }),
+      });
+      if (!res.ok) throw new Error(`${res.status}`);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['me'] }),
+  });
+}
+
+export function useUploadBanner() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const res = await fetch('/api/user/me/banner/upload', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error(`${res.status}`);
+      const { upload_url } = await res.json();
+
+      const uploadRes = await fetch(upload_url, {
+        method: 'PUT',
+        body: await file.arrayBuffer(),
+      });
+      if (!uploadRes.ok) throw new Error('Upload failed');
+
+      const setRes = await fetch('/api/user/me/banner', {
+        method: 'PUT',
+        credentials: 'include',
+      });
+      if (!setRes.ok) throw new Error(`${setRes.status}`);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['me'] }),
+  });
+}
+
 export function useUploadCustomAvatar() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -43,8 +86,7 @@ export function useUploadCustomAvatar() {
 
       const uploadRes = await fetch(upload_url, {
         method: 'PUT',
-        body: file,
-        headers: { 'Content-Type': file.type },
+        body: await file.arrayBuffer(),
       });
       if (!uploadRes.ok) throw new Error('Upload failed');
 

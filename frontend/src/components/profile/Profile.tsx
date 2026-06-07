@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import style from "./profile.module.scss";
 import ProfileFeed from "../profileFeed/ProfileFeed";
@@ -35,6 +35,7 @@ type AchievementItem = {
 
 function Profile() {
   const { user_id } = useParams<{ user_id: string }>();
+  const navigate = useNavigate();
 
   /**
    * TODO:
@@ -126,14 +127,7 @@ function Profile() {
   }
 
   function handleEditClick() {
-    /**
-     * TODO:
-     * Nur eigenes Profil:
-     * - Edit Modal öffnen
-     * - oder zu /profile/edit navigieren
-     * - Banner, Avatar, Description bearbeiten
-     */
-    console.log("Edit profile clicked");
+    navigate("/settings");
   }
 
   if (isLoadingProfile) {
@@ -254,15 +248,6 @@ function Profile() {
           </div>
         </div>
 
-        <section className={style.descriptionBox}>
-          <h2>Description</h2>
-          <p>
-            {profile.description ||
-              "No description yet. This player is mysterious, suspicious, or just busy hunting achievements."}
-          </p>
-        </section>
-
-        <section className={style.achievementSection}>
 
           <div className={style.achievementRow}>
             {achievementItems.map((item) => (
@@ -273,17 +258,21 @@ function Profile() {
                 aria-label={`${item.value} ${item.label} achievements`}
               >
                 <div className={style.trophyIcon}>🏆</div>
-
-                <div className={style.achievementCountBadge}>
-                  {item.value}
-                </div>
-
-                <div className={style.achievementTooltip}>
+                <span className={style.achievementCountBadge}>
+                  {item.value.toLocaleString()}
+                </span>
+                <span className={style.achievementLabel}>
                   {item.label}
-                </div>
+                </span>
               </article>
             ))}
           </div>
+
+        <section className={style.descriptionBox}>
+          <p>
+            {profile.description ||
+              "No description yet. This player is mysterious, suspicious, or just busy hunting achievements."}
+          </p>
         </section>
 
         <div className={style.profileNav}>
@@ -317,14 +306,14 @@ function Profile() {
             Games
           </button>
         </div>
-      </section>
 
-      <section className={style.profileSectionContent}>
-        {activeSection === "feed" && <ProfileFeed userId={profile.user_id} />}
+        <section className={style.profileSectionContent}>
+          {activeSection === "feed" && <ProfileFeed userId={profile.user_id} />}
 
-        {activeSection === "guides" && <ProfileGuides userId={profile.user_id} />}
+          {activeSection === "guides" && <ProfileGuides userId={profile.user_id} />}
 
-        {activeSection === "games" && <ProfileGames userId={profile.user_id} />}
+          {activeSection === "games" && <ProfileGames userId={profile.user_id} />}
+        </section>
       </section>
     </main>
   );

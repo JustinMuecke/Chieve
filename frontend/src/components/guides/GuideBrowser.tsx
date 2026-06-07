@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import style from "./guidesTab.module.scss";
 import { useGuides, useCreateGuide, useUpdateGuide, useToggleFavorite } from "../../api/guides";
@@ -7,6 +7,7 @@ import type { GuideWithOwner } from "../../api/types";
 type GuideBrowserProps = {
   appId: string | undefined;
   onReadGuide: (guide: GuideWithOwner) => void;
+  initialGuideId?: number;
 };
 
 type EditorState = {
@@ -88,7 +89,7 @@ function GuideCard({
   );
 }
 
-function GuideBrowser({ appId, onReadGuide }: GuideBrowserProps) {
+function GuideBrowser({ appId, onReadGuide, initialGuideId }: GuideBrowserProps) {
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [headerImageFile, setHeaderImageFile] = useState<File | null>(null);
   const [headerImagePreview, setHeaderImagePreview] = useState<string | null>(null);
@@ -102,6 +103,13 @@ function GuideBrowser({ appId, onReadGuide }: GuideBrowserProps) {
 
   const myGuides: GuideWithOwner[] = (data?.my_guides ?? []).map((g) => ({ ...g, isOwn: true }));
   const otherGuides: GuideWithOwner[] = (data?.other_guides ?? []).map((g) => ({ ...g, isOwn: false }));
+
+  useEffect(() => {
+    if (!initialGuideId || !data) return;
+    const target = [...myGuides, ...otherGuides].find((g) => g.id === initialGuideId);
+    if (target) onReadGuide(target);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, initialGuideId]);
   const totalCount = myGuides.length + otherGuides.length;
   const favoriteCount = [...myGuides, ...otherGuides].filter((g) => g.is_favorite).length;
   const isSaving = createGuide.isPending || updateGuide.isPending;

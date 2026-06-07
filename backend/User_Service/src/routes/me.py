@@ -1,7 +1,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from src.dependencies import get_current_user_id, get_services
-from src.models.schemas import AvatarOption, SelectAvatarRequest, UploadUrlResponse, UserProfile
+from src.models.schemas import AvatarOption, SelectAvatarRequest, UpdateProfileRequest, UploadUrlResponse, UserProfile
 
 router = APIRouter(prefix="/me")
 
@@ -27,6 +27,8 @@ async def get_me(
         username=user.username,
         email=user.email,
         avatar_url=user.avatar_url,
+        banner_url=user.banner_url,
+        description=user.description,
         avatar_options=options,
         linked_platforms=[a.platform for a in user.linked_accounts],
     )
@@ -39,6 +41,10 @@ async def unlink_platform(
     user_id: int = Depends(get_current_user_id),
 ):
     await services.postgres.delete_linked_account(user_id, platform)
+    try:
+        await services.achievement_client.delete_user_platform_data(user_id)
+    except Exception:
+        pass
 
 
 @router.put("/avatar", status_code=204)
@@ -79,3 +85,31 @@ async def get_upload_url(
     key = services.s3.avatar_key(user_id, "custom")
     upload_url = await services.s3.get_presigned_put_url(key)
     return UploadUrlResponse(upload_url=upload_url, key=key)
+
+
+@router.patch("/profile", status_code=204)
+async def update_profile(
+    body: UpdateProfileRequest,
+    services=Depends(get_services),
+    user_id: int = Depends(get_current_user_id),
+):
+    await services.postgres.update_user_description(user_id, body.description)
+
+
+@router.post("/banner/upload", response_model=UploadUrlResponse)
+async def get_banner_upload_url(
+    services=Depends(get_services),
+    user_id: int = Depends(get_current_user_id),
+):
+    key = services.s3.banner_key(user_id)
+    upload_url = await services.s3.get_presigned_put_url(key)
+    return UploadUrlResponse(upload_url=upload_url, key=key)
+
+
+@router.put("/banner", status_code=204)
+async def set_banner(
+    services=Depends(get_services),
+    user_id: int = Depends(get_current_user_id),
+):
+    url = services.s3.banner_proxy_url(user_id)
+    await services.postgres.update_user_banner(user_id, url)

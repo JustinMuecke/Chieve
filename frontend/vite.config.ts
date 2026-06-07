@@ -15,6 +15,10 @@ export default defineConfig({
         target: process.env.USER_SERVICE_URL ?? 'http://localhost:8000',
         changeOrigin: true,
       },
+      '/api/recommendations': {
+        target: process.env.RECOMMENDATION_SERVICE_URL ?? 'http://localhost:8002',
+        changeOrigin: true,
+      },
     },
   },
 })

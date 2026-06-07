@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useGameFeed } from "../../api/feed";
 import type { AchievementDetail, FeedUserEntry, FeedGuide } from "../../api/types";
 import style from "./gamesDetails.module.scss";
@@ -175,7 +176,8 @@ function FeedTab({ appId }: { appId: string | undefined }) {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 function GameDetails({ appId, game }: GameDetailsProps) {
-  const [activeTab, setActiveTab] = useState<Tab>("achievements");
+  const { state } = useLocation();
+  const [activeTab, setActiveTab] = useState<Tab>(state?.tab ?? "achievements");
 
   const unlocked = game.achievements.filter((a) => a.unlocked);
   const locked = game.achievements.filter((a) => !a.unlocked);
@@ -298,7 +300,7 @@ function GameDetails({ appId, game }: GameDetailsProps) {
           </>
         )}
 
-        {activeTab === "guides" && <GuidesTab appId={appId} />}
+        {activeTab === "guides" && <GuidesTab appId={appId} initialGuideId={state?.guideId} />}
       </div>
     </div>
   );

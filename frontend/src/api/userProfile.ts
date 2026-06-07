@@ -1,3 +1,38 @@
+import type { FeedResponse, GameSummary, GuideResponse } from "./types";
+
+export type { FeedResponse as UserFeed };
+export type UserGuide = GuideResponse;
+
+export async function getUserFeed(userId: number): Promise<FeedResponse> {
+  const params = new URLSearchParams({ days: "90" });
+  const response = await fetch(
+    `/api/achievements/users/${userId}/feed?${params}`,
+    { credentials: "include" }
+  );
+  if (!response.ok) throw new Error("Failed to load user feed.");
+  return response.json();
+}
+
+export async function getUserGuides(userId: number): Promise<GuideResponse[]> {
+  const response = await fetch(
+    `/api/achievements/users/${userId}/guides`,
+    { credentials: "include" }
+  );
+  if (!response.ok) throw new Error("Failed to load user guides.");
+  return response.json();
+}
+
+export type UserGame = GameSummary;
+
+export async function getUserGames(userId: number): Promise<GameSummary[]> {
+  const response = await fetch(
+    `/api/achievements/users/${userId}/games`,
+    { credentials: "include" }
+  );
+  if (!response.ok) throw new Error("Failed to load user games.");
+  return response.json();
+}
+
 export type AchievementStats = {
   perfect: number;
   legendary: number;
@@ -20,25 +55,10 @@ export type UserProfile = {
   achievements: AchievementStats;
 };
 
-const USER_API_BASE =
-  import.meta.env.VITE_USER_API_BASE_URL ?? "http://localhost:8000";
-
 export async function getUserProfile(
   userId: string | number
 ): Promise<UserProfile> {
-  /**
-   * BACKEND:
-   * GET /api/user/profile/{user_id}
-   *
-   * Dieser Endpoint liefert:
-   * - Userdaten
-   * - Avatar/Banner/Description
-   * - Follow-Zahlen
-   * - is_own_profile
-   * - is_following
-   * - Achievement-Zählungen
-   */
-  const response = await fetch(`${USER_API_BASE}/api/user/profile/${userId}`, {
+  const response = await fetch(`/api/user/profile/${userId}`, {
     method: "GET",
     credentials: "include",
   });
@@ -51,14 +71,7 @@ export async function getUserProfile(
 }
 
 export async function followUser(userId: number): Promise<void> {
-  /**
-   * BACKEND:
-   * Vermutlich:
-   * POST /api/social/follow/{target_id}
-   *
-   * Falls euer Backend ohne /api mounted, dann zu /social/follow ändern.
-   */
-  const response = await fetch(`${USER_API_BASE}/api/social/follow/${userId}`, {
+  const response = await fetch(`/api/user/social/follow/${userId}`, {
     method: "POST",
     credentials: "include",
   });
@@ -69,14 +82,7 @@ export async function followUser(userId: number): Promise<void> {
 }
 
 export async function unfollowUser(userId: number): Promise<void> {
-  /**
-   * BACKEND:
-   * Vermutlich:
-   * DELETE /api/social/follow/{target_id}
-   *
-   * Falls euer Backend ohne /api mounted, dann zu /social/follow ändern.
-   */
-  const response = await fetch(`${USER_API_BASE}/api/social/follow/${userId}`, {
+  const response = await fetch(`/api/user/social/follow/${userId}`, {
     method: "DELETE",
     credentials: "include",
   });

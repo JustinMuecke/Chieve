@@ -1,0 +1,18 @@
+[project]
+name = "recommendation-service"
+version = "0.1.0"
+description = "Game recommendation and wishlist service for Chieve"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[standard]",
+    "httpx",
+    "PyJWT",
+    "sqlalchemy[asyncio]",
+    "asyncpg",
+    "alembic",
+    "celery[redis]",
+    "redis[hiredis]",
+    "pgvector",
+    "sentence-transformers",
+]

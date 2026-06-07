@@ -45,6 +45,33 @@ class PostgresService:
             await session.commit()
             return result.scalar_one()
 
+    async def update_game_store_details(
+        self, external_app_id: int, description: str | None, tags: list[str] | None
+    ) -> None:
+        """Updates description and tags on a game row, only overwriting non-null values."""
+        if description is None and tags is None:
+            return
+        async with self._session() as session:
+            result = await session.execute(
+                select(Game).where(Game.external_app_id == external_app_id)
+            )
+            game = result.scalar_one_or_none()
+            if not game:
+                return
+            if description is not None:
+                game.description = description
+            if tags is not None:
+                game.tags = tags
+            await session.commit()
+
+    async def get_games_missing_descriptions(self) -> list[int]:
+        """Returns external_app_ids of all games with no description yet."""
+        async with self._session() as session:
+            result = await session.execute(
+                select(Game.external_app_id).where(Game.description.is_(None))
+            )
+            return [row[0] for row in result]
+
     async def update_game_stats_timestamp(self, game_id: int) -> None:
         async with self._session() as session:
             result = await session.execute(select(Game).where(Game.id == game_id))
@@ -627,6 +654,80 @@ class PostgresService:
             )
             return [dict(row._mapping) for row in result]
 
+    async def get_owned_app_ids(self, user_id: int) -> list[int]:
+        """Returns external_app_ids of all games the user has at least one achievement in."""
+        async with self._session() as session:
+            result = await session.execute(
+                text("""
+                    SELECT DISTINCT g.external_app_id
+                    FROM user_achievements ua
+                    JOIN achievements a ON a.id = ua.achievement_id
+                    JOIN games g ON g.id = a.game_id
+                    WHERE ua.user_id = :user_id
+                """),
+                {"user_id": user_id},
+            )
+            return [row[0] for row in result]
+
+    async def get_games_by_app_ids(self, app_ids: list[int]) -> list[dict]:
+        """Returns game details for the given external_app_ids."""
+        if not app_ids:
+            return []
+        async with self._session() as session:
+            result = await session.execute(
+                text("""
+                    SELECT g.external_app_id AS app_id, g.name, g.header_image_url,
+                           g.description, g.tags, COUNT(a.id) AS achievement_count
+                    FROM games g
+                    LEFT JOIN achievements a ON a.game_id = g.id
+                    WHERE g.external_app_id = ANY(:app_ids)
+                    GROUP BY g.id
+                """),
+                {"app_ids": app_ids},
+            )
+            return [dict(row._mapping) for row in result]
+
+    async def get_all_games_paginated(self, limit: int, offset: int) -> list[dict]:
+        """Returns paginated game details for embedding generation."""
+        async with self._session() as session:
+            result = await session.execute(
+                text("""
+                    SELECT g.external_app_id AS app_id, g.name, g.header_image_url,
+                           g.description, g.tags, COUNT(a.id) AS achievement_count
+                    FROM games g
+                    LEFT JOIN achievements a ON a.game_id = g.id
+                    GROUP BY g.id
+                    ORDER BY g.id
+                    LIMIT :limit OFFSET :offset
+                """),
+                {"limit": limit, "offset": offset},
+            )
+            return [dict(row._mapping) for row in result]
+
+    async def get_user_game_completion(self, user_id: int) -> list[dict]:
+        """Returns [{app_id, completion_pct}] for all games the user has played."""
+        async with self._session() as session:
+            result = await session.execute(
+                text("""
+                    SELECT g.external_app_id AS app_id,
+                           CASE WHEN COUNT(a.id) = 0 THEN 0.0
+                                ELSE COUNT(ua.achievement_id)::float / COUNT(a.id) * 100
+                           END AS completion_pct
+                    FROM games g
+                    JOIN achievements a ON a.game_id = g.id
+                    LEFT JOIN user_achievements ua
+                        ON ua.achievement_id = a.id AND ua.user_id = :user_id
+                    WHERE EXISTS (
+                        SELECT 1 FROM user_achievements ua2
+                        JOIN achievements a2 ON a2.id = ua2.achievement_id
+                        WHERE ua2.user_id = :user_id AND a2.game_id = g.id
+                    )
+                    GROUP BY g.id
+                """),
+                {"user_id": user_id},
+            )
+            return [dict(row._mapping) for row in result]
+
     async def get_user_achievement_breakdown(self, user_id: int) -> dict:
         async with self._session() as session:
             result = await session.execute(
@@ -730,4 +831,20 @@ class PostgresService:
             if not favorite:
                 raise GuideFavoriteNotFoundError()
             await session.delete(favorite)
+            await session.commit()
+
+    async def delete_user_platform_data(self, user_id: int) -> None:
+        async with self._session() as session:
+            await session.execute(
+                text("DELETE FROM user_achievements WHERE user_id = :uid"),
+                {"uid": user_id},
+            )
+            await session.execute(
+                text("DELETE FROM user_milestones WHERE user_id = :uid"),
+                {"uid": user_id},
+            )
+            await session.execute(
+                text("DELETE FROM user_profile_stats WHERE user_id = :uid"),
+                {"uid": user_id},
+            )
             await session.commit()

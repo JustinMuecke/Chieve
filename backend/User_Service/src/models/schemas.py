@@ -11,6 +11,8 @@ class UserProfile(BaseModel):
     username: str
     email: str | None
     avatar_url: str | None
+    banner_url: str | None
+    description: str | None
     avatar_options: list[AvatarOption]
     linked_platforms: list[str]
 
@@ -22,6 +24,10 @@ class SelectAvatarRequest(BaseModel):
 class UploadUrlResponse(BaseModel):
     upload_url: str
     key: str
+
+
+class UpdateProfileRequest(BaseModel):
+    description: str | None = None
 
 
 class UserSummary(BaseModel):

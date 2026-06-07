@@ -39,8 +39,6 @@ function ProfileDropdown() {
         ) : (
           <span className={style.profileInitial}>{user.username[0].toUpperCase()}</span>
         )}
-        <span className={style.profileName}>{user.username}</span>
-        <span className={style.profileChevron}>{open ? "▲" : "▼"}</span>
       </button>
 
       {open && (
@@ -69,12 +67,10 @@ function Header() {
 
   return (
     <header className={style.header}>
-      <div className={style.brand}>
-        <Link to="/" className={style.brandLink}>
-          <img src={logoImage} alt="Website Logo" className={style.logo} />
-          <h1 className={style.title}>Chieve Collector</h1>
-        </Link>
-      </div>
+      <Link to="/" className={style.brandLink}>
+        <img src={logoImage} alt="Website Logo" className={style.logo} />
+        <h1 className={style.title}>Chieve Collector</h1>
+      </Link>
 
 
       <div className={style.rightArea}>
@@ -87,12 +83,14 @@ function Header() {
           ‹
         </button>
         <HeaderSearch /> 
-        <nav className={style.nav}>
-          <Link to="/games">Games</Link>
-          <Link to="/ranking">Ranking</Link>
-        </nav>
-
-        <ProfileDropdown />
+        <div className={style.navGroup}>
+          <nav className={style.nav}>
+            <Link to="/games">Games</Link>
+            <Link to="/discover">Discover</Link>
+            <Link to="/ranking">Ranking</Link>
+          </nav>
+          <ProfileDropdown />
+        </div>
       </div>
     </header>
   );

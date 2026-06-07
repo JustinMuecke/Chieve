@@ -46,6 +46,22 @@ class PostgresService:
                     user.avatar_url = avatar_url
                 await session.commit()
 
+    async def update_user_description(self, user_id: int, description: str | None) -> None:
+        async with self._session() as session:
+            result = await session.execute(select(User).where(User.id == user_id))
+            user = result.scalar_one_or_none()
+            if user:
+                user.description = description
+                await session.commit()
+
+    async def update_user_banner(self, user_id: int, banner_url: str | None) -> None:
+        async with self._session() as session:
+            result = await session.execute(select(User).where(User.id == user_id))
+            user = result.scalar_one_or_none()
+            if user:
+                user.banner_url = banner_url
+                await session.commit()
+
     async def update_user_avatar(self, user_id: int, avatar_url: str) -> None:
         async with self._session() as session:
             result = await session.execute(select(User).where(User.id == user_id))

@@ -1,8 +1,21 @@
+import os
 from datetime import datetime, timedelta, timezone
+
+from celery import Celery
 
 from src.models.errors import SteamPrivateProfileError, SteamAPIError
 from src.services.platforms.base import BasePlatformService
 from src.services.steam_api_service import SteamApiService
+
+
+def _dispatch_embedding_task(app_id: int, name: str, description: str | None, tags: list[str] | None) -> None:
+    """Sends the embedding task to the Recommendation Service worker via shared Redis broker."""
+    broker = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    Celery(broker=broker).send_task(
+        "generate_embedding_for_game",
+        kwargs={"app_id": app_id, "name": name, "description": description, "tags": tags},
+        queue="recommendation",
+    )
 
 _STATS_TTL = timedelta(days=7)
 
@@ -35,6 +48,23 @@ class SteamPlatformService(BasePlatformService):
                 name=game_name,
                 header_image_url=header_image,
             )
+
+            if game.description is None:
+                try:
+                    store = await self._api.get_store_details(app_id)
+                    if store:
+                        await postgres.update_game_store_details(app_id, **store)
+                        try:
+                            _dispatch_embedding_task(
+                                app_id=app_id,
+                                name=game_name,
+                                description=store.get("description"),
+                                tags=store.get("tags"),
+                            )
+                        except Exception:
+                            pass
+                except Exception:
+                    pass
 
             try:
                 player_achievements = await self._api.get_player_achievements(steam_id, app_id)

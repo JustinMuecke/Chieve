@@ -36,3 +36,15 @@ class AchievementServiceClient:
             except httpx.HTTPError as e:
                 raise AchievementServiceError(f"Achievement Service call failed: {e}") from e
         return resp.json()
+
+    async def delete_user_platform_data(self, user_id: int) -> None:
+        headers = {"Authorization": f"Bearer {self._service_token()}"}
+        async with httpx.AsyncClient(timeout=10) as client:
+            try:
+                resp = await client.delete(
+                    f"{self._base_url}/internal/users/{user_id}/platform-data",
+                    headers=headers,
+                )
+                resp.raise_for_status()
+            except httpx.HTTPError as e:
+                raise AchievementServiceError(f"Achievement Service call failed: {e}") from e

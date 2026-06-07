@@ -1,4 +1,5 @@
 import os
+import re
 from datetime import datetime, timezone
 
 import httpx
@@ -6,7 +7,14 @@ import httpx
 from src.models.errors import SteamAPIError, SteamPrivateProfileError
 
 
+def _strip_html(text: str) -> str:
+    text = re.sub(r"<[^>]+>", " ", text)
+    text = re.sub(r"\s{2,}", " ", text)
+    return text.strip()
+
+
 STEAM_API_BASE = "https://api.steampowered.com"
+STEAM_STORE_API_BASE = "https://store.steampowered.com/api"
 
 
 def _global_points(unlock_percent: float | str | None) -> int:
@@ -108,6 +116,32 @@ class SteamApiService:
                 "global_points": _global_points(pct),
             })
         return rows
+
+    async def get_store_details(self, app_id: int) -> dict | None:
+        """Returns {description, tags} from Steam Store API, or None on failure."""
+        try:
+            async with httpx.AsyncClient(timeout=10) as client:
+                resp = await client.get(
+                    f"{STEAM_STORE_API_BASE}/appdetails",
+                    params={"appids": app_id},
+                )
+                resp.raise_for_status()
+        except httpx.HTTPError:
+            return None
+        data = resp.json().get(str(app_id), {})
+        if not data.get("success"):
+            return None
+        app_data = data.get("data", {})
+        if not isinstance(app_data, dict):
+            return None
+        description = (
+            app_data.get("short_description")
+            or _strip_html(app_data.get("detailed_description") or "")[:600]
+            or None
+        )
+        genres = app_data.get("genres", [])
+        tags = [g["description"] for g in genres if g.get("description")] or None
+        return {"description": description, "tags": tags}
 
     def parse_unlock_time(self, unlocktime: int) -> datetime | None:
         if not unlocktime:

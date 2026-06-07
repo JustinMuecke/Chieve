@@ -10,6 +10,8 @@ export interface UserProfile {
   username: string;
   email: string | null;
   avatar_url: string | null;
+  banner_url: string | null;
+  description: string | null;
   avatar_options: AvatarOption[];
   linked_platforms: string[];
 }

@@ -2,7 +2,7 @@ name: chieve
 
 services:
   postgres:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -141,12 +141,54 @@ services:
       redis:
         condition: service_healthy
 
+  recommendation_service:
+    build:
+      context: ./backend/Recommendation_Service
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      ENV: ${ENV:-development}
+      JWT_SECRET: ${JWT_SECRET}
+      REDIS_URL: redis://redis:6379/0
+      ACHIEVEMENT_SERVICE_URL: http://achievement_service:8001
+    ports:
+      - "8002:8002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      achievement_service:
+        condition: service_started
+
+  recommendation_celery_worker:
+    build:
+      context: ./backend/Recommendation_Service
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      ENV: ${ENV:-development}
+      JWT_SECRET: ${JWT_SECRET}
+      REDIS_URL: redis://redis:6379/0
+      ACHIEVEMENT_SERVICE_URL: http://achievement_service:8001
+    command: celery -A src.worker.celery_app worker --beat --loglevel=info --concurrency=1 --queues=recommendation
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
   frontend:
     build:
       context: ./frontend
     environment:
       ACHIEVEMENT_SERVICE_URL: http://achievement_service:8001
       USER_SERVICE_URL: http://user_service:8000
+      RECOMMENDATION_SERVICE_URL: http://recommendation_service:8002
     ports:
       - "5173:5173"
     volumes:
@@ -155,6 +197,7 @@ services:
     depends_on:
       - user_service
       - achievement_service
+      - recommendation_service
 
 volumes:
   postgres_data:
