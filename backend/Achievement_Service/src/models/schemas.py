@@ -42,6 +42,7 @@ class GameCatalogEntry(BaseModel):
     name: str
     header_image_url: str | None
     total_achievements: int
+    player_count: int = 0
 
 
 class GameSummary(BaseModel):

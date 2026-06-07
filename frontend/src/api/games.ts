@@ -7,12 +7,17 @@ async function fetchJson<T>(url: string): Promise<T> {
   return res.json();
 }
 
-export function useGameCatalog(params: { q?: string; page?: number; pageSize?: number } = {}) {
-  const { q, page = 1, pageSize = 50 } = params;
-  const search = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
+export function useGameCatalog(params: { q?: string; page?: number; pageSize?: number; sortBy?: string; asc?: boolean } = {}) {
+  const { q, page = 1, pageSize = 50, sortBy = 'alphabetical', asc = true } = params;
+  const search = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+    sort_by: sortBy,
+    order: asc ? 'asc' : 'desc',
+  });
   if (q) search.set('q', q);
   return useQuery<GameCatalogResponse>({
-    queryKey: ['games', 'catalog', q ?? '', page, pageSize],
+    queryKey: ['games', 'catalog', q ?? '', page, pageSize, sortBy, asc],
     queryFn: () => fetchJson(`/api/achievements/games?${search}`),
   });
 }

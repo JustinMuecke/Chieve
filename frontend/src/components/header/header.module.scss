@@ -52,12 +52,53 @@
   transform: scale(1.05);
 }
 
+// ── Center search ─────────────────────────────────────────────────────────────
+
+.searchCenter {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  pointer-events: auto;
+}
+
 // ── Right area ────────────────────────────────────────────────────────────────
 
 .rightArea {
   display: flex;
   align-items: center;
   gap: 4px;
+  margin-left: auto;
+}
+
+// ── History buttons ───────────────────────────────────────────────────────────
+
+.historyBtn {
+  width: 28px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.3);
+
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0;
+
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  svg {
+    display: block;
+  }
 }
 
 // ── Nav links ─────────────────────────────────────────────────────────────────
@@ -82,12 +123,11 @@
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
 
-  transition: color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  transition: color 0.15s ease, border-color 0.15s ease;
 
   &:hover {
     color: rgba(255, 255, 255, 0.9);
     border-bottom-color: rgba(199, 125, 255, 0.45);
-    transform: translateY(-1px);
   }
 }
 
@@ -99,33 +139,6 @@
 
 
 
-// ── Back button ───────────────────────────────────────────────────────────────
-
-.backButton {
-  width: 32px;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: transparent;
-  color: rgba(255, 255, 255, 0.45);
-
-  font-size: 1.35rem;
-  line-height: 1;
-  font-family: inherit;
-  cursor: pointer;
-
-  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-
-  &:hover {
-    color: white;
-    border-color: rgba(255, 255, 255, 0.22);
-    background: rgba(255, 255, 255, 0.06);
-  }
-}
 
 // ── Profile trigger ───────────────────────────────────────────────────────────
 

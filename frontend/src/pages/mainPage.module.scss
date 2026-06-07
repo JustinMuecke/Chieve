@@ -20,6 +20,8 @@
   position: sticky;
   top: 80px;
   align-self: start;
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
 }
 
 @media (max-width: 860px) {

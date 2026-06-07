@@ -14,15 +14,18 @@ async def list_all_games(
     q: str | None = Query(None, description="Filter by game name"),
     page: int = Query(1, ge=1),
     page_size: int = Query(_DEFAULT_PAGE_SIZE, ge=1, le=200),
+    sort_by: str = Query("alphabetical", pattern="^(alphabetical|achievements|popular)$"),
+    order: str = Query("asc", pattern="^(asc|desc)$"),
     services=Depends(get_services),
 ):
-    rows, total = await services.postgres.get_all_games(q=q, page=page, page_size=page_size)
+    rows, total = await services.postgres.get_all_games(q=q, page=page, page_size=page_size, sort_by=sort_by, order=order)
     entries = [
         GameCatalogEntry(
             app_id=row["external_app_id"],
             name=row["name"],
             header_image_url=row["header_image_url"],
             total_achievements=row["total_achievements"],
+            player_count=row["player_count"],
         )
         for row in rows
     ]

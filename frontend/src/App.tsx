@@ -25,21 +25,23 @@ function App() {
 
   return (
     <AuthContext.Provider value={{ user }}>
-      <div>
+      <div style={{ display: 'contents' }}>
         <Header />
 
-        <Routes>
-          <Route path="/" element={<MainPage />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/profile/:user_id" element={<Profile />} />
-          <Route path="/profile/:user_id" element={<ProfilePage />} />
-          <Route path="/games" element={<Games />} />
-          <Route path="/games/:app_id" element={<GameDetail />} />
-          <Route path="/ranking" element={<Ranglist />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/friends" element={<FriendsPage />} />
-          <Route path="/discover" element={<DiscoverPage />} />
-        </Routes>
+        <main style={{ flex: 1 }}>
+          <Routes>
+            <Route path="/" element={<MainPage />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/:user_id" element={<Profile />} />
+            <Route path="/profile/:user_id" element={<ProfilePage />} />
+            <Route path="/games" element={<Games />} />
+            <Route path="/games/:app_id" element={<GameDetail />} />
+            <Route path="/ranking" element={<Ranglist />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/friends" element={<FriendsPage />} />
+            <Route path="/discover" element={<DiscoverPage />} />
+          </Routes>
+        </main>
 
         <Footer />
       </div>

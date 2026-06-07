@@ -23,6 +23,7 @@ export interface GameCatalogEntry {
   name: string;
   header_image_url: string | null;
   total_achievements: number;
+  player_count: number;
 }
 
 export interface GameCatalogResponse {

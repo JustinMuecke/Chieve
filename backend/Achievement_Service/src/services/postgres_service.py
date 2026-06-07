@@ -131,8 +131,16 @@ class PostgresService:
             return result.scalar_one_or_none()
 
     async def get_all_games(
-        self, q: str | None, page: int, page_size: int
+        self, q: str | None, page: int, page_size: int,
+        sort_by: str = "alphabetical", order: str = "asc",
     ) -> tuple[list[dict], int]:
+        _sort_col = {
+            "alphabetical": "g.name",
+            "achievements": "total_achievements",
+            "popular": "player_count",
+        }.get(sort_by, "g.name")
+        _dir = "DESC" if order == "desc" else "ASC"
+
         offset = (page - 1) * page_size
         async with self._session() as session:
             if q:
@@ -142,14 +150,16 @@ class PostgresService:
                 )
                 total = count_result.scalar_one()
                 result = await session.execute(
-                    text("""
+                    text(f"""
                         SELECT g.external_app_id, g.name, g.header_image_url,
-                               COUNT(a.id) AS total_achievements
+                               COUNT(DISTINCT a.id) AS total_achievements,
+                               COUNT(DISTINCT ua.user_id) AS player_count
                         FROM games g
                         LEFT JOIN achievements a ON a.game_id = g.id
+                        LEFT JOIN user_achievements ua ON ua.achievement_id = a.id
                         WHERE g.name ILIKE :q
                         GROUP BY g.id
-                        ORDER BY g.name
+                        ORDER BY {_sort_col} {_dir}
                         LIMIT :limit OFFSET :offset
                     """),
                     {"q": f"%{q}%", "limit": page_size, "offset": offset},
@@ -158,13 +168,15 @@ class PostgresService:
                 count_result = await session.execute(text("SELECT COUNT(*) FROM games"))
                 total = count_result.scalar_one()
                 result = await session.execute(
-                    text("""
+                    text(f"""
                         SELECT g.external_app_id, g.name, g.header_image_url,
-                               COUNT(a.id) AS total_achievements
+                               COUNT(DISTINCT a.id) AS total_achievements,
+                               COUNT(DISTINCT ua.user_id) AS player_count
                         FROM games g
                         LEFT JOIN achievements a ON a.game_id = g.id
+                        LEFT JOIN user_achievements ua ON ua.achievement_id = a.id
                         GROUP BY g.id
-                        ORDER BY g.name
+                        ORDER BY {_sort_col} {_dir}
                         LIMIT :limit OFFSET :offset
                     """),
                     {"limit": page_size, "offset": offset},

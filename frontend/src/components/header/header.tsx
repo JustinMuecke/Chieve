@@ -6,12 +6,11 @@ import style from "./header.module.scss";
 
 import HeaderSearch from "../searchBar/HeaderSearch";
 
-
 import { CgGames, CgProfile } from "react-icons/cg";
 import { PiRankingFill } from "react-icons/pi";
 import { MdReadMore } from "react-icons/md";
 import { LiaUserFriendsSolid } from "react-icons/lia";
-import { IoSettingsOutline } from "react-icons/io5";
+import { IoSettingsOutline, IoArrowBackOutline, IoArrowForwardOutline } from "react-icons/io5";
 import { IoMdLogOut } from "react-icons/io";
 
 
@@ -51,50 +50,21 @@ function ProfileDropdown() {
 
       {open && (
         <div className={style.dropdown}>
-          <button
-            className={style.dropdownItem}
-            onClick={() => {
-              navigate(`/profile/${user.id}`);
-              setOpen(false);
-            }}
-          >
-            <CgProfile />
-            <span>Visit Profile</span>
+          <button className={style.dropdownItem} onClick={() => { navigate(`/profile/${user.id}`); setOpen(false); }}>
+            <CgProfile /><span>Profile</span>
           </button>
-
-          <button
-            className={style.dropdownItem}
-            onClick={() => {
-              navigate("/friends");
-              setOpen(false);
-            }}
-          >
-            <LiaUserFriendsSolid />
-            <span>Friends</span>
+          <button className={style.dropdownItem} onClick={() => { navigate("/friends"); setOpen(false); }}>
+            <LiaUserFriendsSolid /><span>Friends</span>
           </button>
-
-          <button
-            className={style.dropdownItem}
-            onClick={() => {
-              navigate("/settings");
-              setOpen(false);
-            }}
-          >
-            <IoSettingsOutline />
-            <span>Settings</span>
+          <button className={style.dropdownItem} onClick={() => { navigate("/settings"); setOpen(false); }}>
+            <IoSettingsOutline /><span>Settings</span>
           </button>
-
           <hr className={style.dropdownDivider} />
-
-          <button
-            className={`${style.dropdownItem} ${style.dropdownDanger}`}
-            onClick={handleLogout}
-          >
-            <IoMdLogOut />
-            <span>Logout</span>
+          <button className={`${style.dropdownItem} ${style.dropdownDanger}`} onClick={handleLogout}>
+            <IoMdLogOut /><span>Logout</span>
           </button>
         </div>
-    )}
+      )}
     </div>
   );
 }
@@ -104,38 +74,28 @@ function Header() {
 
   return (
     <header className={style.header}>
+      {/* Left: brand */}
       <Link to="/" className={style.brandLink}>
         <img src={logoImage} alt="Website Logo" className={style.logo} />
         <h1 className={style.title}>Chieve Collector</h1>
       </Link>
 
+      {/* Center: back · search · forward */}
+      <div className={style.searchCenter}>
+        <button type="button" className={style.historyBtn} onClick={() => navigate(-1)} aria-label="Go back" title="Go back"><IoArrowBackOutline /></button>
+        <HeaderSearch />
+        <button type="button" className={style.historyBtn} onClick={() => navigate(1)} aria-label="Go forward" title="Go forward"><IoArrowForwardOutline /></button>
+      </div>
 
+      {/* Right: nav + profile */}
       <div className={style.rightArea}>
-        <button
-          type="button"
-          className={style.backButton}
-          onClick={() => navigate(-1)}
-          aria-label="Go back"
-          title="Go back">
-          ‹
-        </button>
-        <HeaderSearch /> 
-        <div className={style.navGroup}>
-          <nav className={style.nav}>
-            <Link to="/games" aria-label="Games" title="Games">
-              <CgGames />
-            </Link>
+        <nav className={style.nav}>
+          <Link to="/games" aria-label="Games" title="Games"><CgGames /></Link>
+          <Link to="/ranking" aria-label="Ranking" title="Ranking"><PiRankingFill /></Link>
+          <Link to="/discover" aria-label="Discover" title="Discover"><MdReadMore /></Link>
+        </nav>
 
-            <Link to="/ranking" aria-label="Ranking" title="Ranking">
-              <PiRankingFill />
-            </Link>
-
-            <Link to="/discover" aria-label="Discover" title="Discover">
-              <MdReadMore />
-            </Link>
-          </nav>
-          <ProfileDropdown />
-        </div>
+        <ProfileDropdown />
       </div>
     </header>
   );

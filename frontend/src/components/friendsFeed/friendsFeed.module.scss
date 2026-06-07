@@ -19,15 +19,37 @@
   padding: 24px 0;
 }
 
-.userEntry {
+.dayGroup {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 2px;
   padding: 16px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 
   &:last-child {
     border-bottom: none;
+  }
+}
+
+.dayLabel {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.28);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.userActivity {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 0 8px 0;
+
+  & + & {
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    margin-top: 4px;
   }
 }
 

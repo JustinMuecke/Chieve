@@ -23,6 +23,6 @@ export function useFriendsFeed(days = 90) {
       if (!res.ok) throw new Error('Failed to load feed');
       return res.json();
     },
-    staleTime: 2 * 60 * 1000,
+    staleTime: 0,
   });
 }
