@@ -12,7 +12,7 @@ export function useLeaderboard({ sort_by, scope, page }: LeaderboardParams) {
     queryKey: ['leaderboard', sort_by, scope, page],
     queryFn: async () => {
       const params = new URLSearchParams({ sort_by, scope, page: String(page) });
-      const res = await fetch(`/api/achievements/leaderboard?${params}`);
+      const res = await fetch(`/api/achievements/leaderboard?${params}`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to load leaderboard');
       return res.json();
     },

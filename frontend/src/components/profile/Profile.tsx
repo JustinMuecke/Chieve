@@ -7,6 +7,7 @@ import ProfileFeed from "../profileFeed/ProfileFeed";
 import ProfileGuides from "../profileGuides/ProfileGuides";
 import ProfileGames from "../profileGames/ProfileGames";
 import ProfileStats from "../profileStats/ProfileStats";
+import ProfileWishlist from "../profileWishlist/ProfileWishlist";
 
 
 import {
@@ -24,7 +25,7 @@ import {
 
 
 
-type ProfileSection = "feed" | "guides" | "games" | "stats";
+type ProfileSection = "feed" | "guides" | "games" | "stats" | "wishlist";
 type AchievementType = keyof AchievementStats;
 
 type AchievementItem = {
@@ -316,6 +317,18 @@ function Profile() {
           >
             Stats
           </button>
+
+          {profile.is_own_profile && (
+            <button
+              type="button"
+              className={`${style.profileNavButton} ${
+                activeSection === "wishlist" ? style.profileNavButtonActive : ""
+              }`}
+              onClick={() => setActiveSection("wishlist")}
+            >
+              Wishlist
+            </button>
+          )}
         </div>
 
         <section className={style.profileSectionContent}>
@@ -326,6 +339,8 @@ function Profile() {
           {activeSection === "games" && <ProfileGames userId={profile.user_id} />}
 
           {activeSection === "stats" && <ProfileStats userId={String(profile.user_id)} />}
+
+          {activeSection === "wishlist" && <ProfileWishlist />}
         </section>
       </section>
     </main>
