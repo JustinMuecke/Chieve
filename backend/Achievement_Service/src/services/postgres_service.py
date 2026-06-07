@@ -675,6 +675,59 @@ class PostgresService:
             await session.commit()
             return guide
 
+    async def get_all_guides(
+        self,
+        page: int,
+        page_size: int,
+        app_id: int | None = None,
+        sort_by: str = "favorites",
+        order: str = "desc",
+        user_id: int | None = None,
+    ) -> tuple[list[dict], int]:
+        _sort_col = "favorite_count" if sort_by == "favorites" else "gu.created_at"
+        _dir = "DESC" if order == "desc" else "ASC"
+        offset = (page - 1) * page_size
+        where = "WHERE g.external_app_id = :app_id" if app_id is not None else ""
+        async with self._session() as session:
+            count_result = await session.execute(
+                text(f"""
+                    SELECT COUNT(*) FROM guides gu
+                    JOIN games g ON g.id = gu.game_id
+                    {where}
+                """),
+                {"app_id": app_id},
+            )
+            total = count_result.scalar_one()
+            result = await session.execute(
+                text(f"""
+                    SELECT gu.id, gu.user_id, gu.title, gu.description,
+                           gu.s3_key, gu.header_image_s3_key,
+                           gu.created_at, gu.updated_at,
+                           g.external_app_id AS app_id, g.name AS game_name,
+                           (gf.guide_id IS NOT NULL) AS is_favorite,
+                           COUNT(gfall.guide_id) AS favorite_count,
+                           (
+                               SELECT COUNT(*) FROM user_achievements ua
+                               JOIN achievements a ON a.id = ua.achievement_id
+                               WHERE ua.user_id = gu.user_id AND a.game_id = gu.game_id
+                           ) AS author_achievement_count,
+                           (
+                               SELECT COUNT(*) FROM achievements a2
+                               WHERE a2.game_id = gu.game_id
+                           ) AS game_total_achievements
+                    FROM guides gu
+                    JOIN games g ON g.id = gu.game_id
+                    LEFT JOIN guide_favorites gf ON gf.guide_id = gu.id AND gf.user_id = :user_id
+                    LEFT JOIN guide_favorites gfall ON gfall.guide_id = gu.id
+                    {where}
+                    GROUP BY gu.id, g.id, gf.guide_id
+                    ORDER BY {_sort_col} {_dir}
+                    LIMIT :limit OFFSET :offset
+                """),
+                {"app_id": app_id, "user_id": user_id, "limit": page_size, "offset": offset},
+            )
+            return [dict(row._mapping) for row in result], total
+
     async def get_guides_for_game(
         self, external_app_id: int, user_id: int | None = None
     ) -> list[dict]:

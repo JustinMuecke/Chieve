@@ -37,55 +37,41 @@
 }
 
 .createButton {
-  height: 36px;
-  padding: 0 10px;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-
-  font-size: 1rem;
-  font-weight: 600;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: rgba(199, 125, 255, 0.7);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: color 0.15s ease;
 }
 
 .createButton:hover {
-  background: rgba(199, 125, 255, 0.35);
-  border-color: #c77dff;
-  transform: translateY(-2px);
+  color: #c77dff;
 }
 
 .saveButton {
-  padding: 10px 16px;
-
-  border: none;
+  padding: 8px 18px;
   border-radius: 8px;
-
-  background: #c77dff;
-  color: #23001f;
-
-  font-size: 0.95rem;
-  font-weight: 800;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-size: 0.88rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: 0.2s ease;
-}
+  transition: background 0.15s ease, border-color 0.15s ease;
 
-.saveButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0 18px rgba(199, 125, 255, 0.45);
-}
+  &:hover:not(:disabled) {
+    background: rgba(170, 59, 255, 0.2);
+    border-color: var(--accent);
+  }
 
-.saveButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
+  &:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
 }
 
 .summaryGrid {
@@ -199,6 +185,63 @@
   margin-bottom: 18px;
 }
 
+.gameDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 60;
+  background: #13101e;
+  border: 1px solid rgba(199, 125, 255, 0.22);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.gameDropdownItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s;
+
+  &:hover {
+    background: rgba(199, 125, 255, 0.1);
+    color: white;
+  }
+}
+
+.gameDropdownItemActive {
+  color: #c77dff;
+  font-weight: 600;
+}
+
+.gameDropdownThumb {
+  width: 48px;
+  height: 27px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.gameInputSelected {
+  border-color: rgba(199, 125, 255, 0.5) !important;
+}
+
+.gameInputDisabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
 .optional {
   font-weight: 400;
   color: rgba(255, 255, 255, 0.38);
@@ -225,6 +268,91 @@
   gap: 18px;
 }
 
+.markdownEditor {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 4px;
+}
+
+.markdownTabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid rgba(199, 125, 255, 0.18);
+  margin-bottom: 0;
+}
+
+.markdownTab {
+  padding: 7px 16px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
+
+  &:hover {
+    color: rgba(255, 255, 255, 0.8);
+  }
+}
+
+.markdownTabActive {
+  color: white;
+  border-bottom-color: #c77dff;
+}
+
+.markdownTabSpacer {
+  flex: 1;
+}
+
+.imageInsertBtn {
+  padding: 6px 12px;
+  margin: 2px 0;
+  border: 1px solid rgba(199, 125, 255, 0.25);
+  border-radius: 6px;
+  background: rgba(199, 125, 255, 0.08);
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+
+  &:hover:not(:disabled) {
+    background: rgba(199, 125, 255, 0.18);
+    color: white;
+    border-color: rgba(199, 125, 255, 0.5);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}
+
+.markdownTextarea {
+  width: 100%;
+  min-height: 480px;
+  padding: 16px;
+  border: 1px solid rgba(199, 125, 255, 0.2);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  background: rgba(0, 0, 0, 0.24);
+  color: white;
+  font: inherit;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+
+  &:focus {
+    border-color: rgba(199, 125, 255, 0.62);
+    box-shadow: 0 0 0 3px rgba(199, 125, 255, 0.1);
+  }
+}
+
 .previewBox {
   display: flex;
   flex-direction: column;
@@ -232,12 +360,13 @@
 }
 
 .markdownPreview {
-  min-height: 260px;
-  padding: 14px;
+  min-height: 480px;
+  padding: 16px;
 
-  border-radius: 8px;
+  border-radius: 0 0 8px 8px;
   background: rgba(0, 0, 0, 0.24);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(199, 125, 255, 0.2);
+  border-top: none;
 
   color: rgba(255, 255, 255, 0.78);
   line-height: 1.6;
@@ -257,7 +386,7 @@
 }
 
 .emptyPreview {
-  min-height: 260px;
+  min-height: 480px;
   margin: 0;
   padding: 14px;
 
@@ -285,34 +414,38 @@
 
 .secondaryButton,
 .editButton {
-  padding: 10px 16px;
-
+  padding: 8px 18px;
   border-radius: 8px;
-
-  font-weight: 800;
+  border: 1px solid var(--border);
+  background: var(--code-bg);
+  color: var(--text-h);
+  font-size: 0.88rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: 0.2s ease;
-}
+  transition: border-color 0.15s ease, background 0.15s ease;
 
-.secondaryButton {
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: transparent;
-  color: white;
-}
+  &:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: var(--accent-bg);
+  }
 
-.secondaryButton:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.secondaryButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  &:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
 }
 
 .guideSection {
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+.sectionLabelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
 }
 
 .sectionLabel {
@@ -475,41 +608,32 @@
 }
 
 .favoriteButton {
-  width: 36px;
-  height: 36px;
-
-  flex: 0 0 auto;
-
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-
+  gap: 4px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 5px 12px;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.7);
-
-  font-size: 1.1rem;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: border-color 0.15s ease, color 0.15s ease;
 }
 
 .favoriteButton:hover {
-  background: rgba(199, 125, 255, 0.35);
-  border-color: #c77dff;
-  transform: translateY(-2px);
+  border-color: rgba(255, 209, 102, 0.5);
+  color: #ffd166;
 }
 
 .favoriteButtonActive {
-  background: rgba(255, 209, 102, 0.15);
   border-color: rgba(255, 209, 102, 0.45);
   color: #ffd166;
 }
 
 .favoriteButtonActive:hover {
-  background: rgba(255, 209, 102, 0.25);
-  border-color: #ffd166;
+  border-color: rgba(255, 209, 102, 0.7);
 }
 
 .guidePreview {
@@ -534,29 +658,22 @@
 }
 
 .editButton {
-  height: 36px;
-  padding: 0 10px;
-
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 5px 12px;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-
-  font-size: 1rem;
-  font-weight: 600;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: border-color 0.15s ease, color 0.15s ease;
 }
 
 .editButton:hover {
-  background: rgba(199, 125, 255, 0.35);
-  border-color: #c77dff;
-  transform: translateY(-2px);
+  border-color: var(--accent-border);
+  color: var(--accent);
 }
 
 .emptyState {
@@ -685,6 +802,20 @@
   line-height: 1.25;
 }
 
+.viewerMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.viewerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .viewerAuthorBlock {
   display: flex;
   align-items: center;
@@ -716,6 +847,64 @@
 }
 
 
+.viewerBody {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 28px;
+  align-items: start;
+
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.toc {
+  position: sticky;
+  top: 84px;
+  padding: 16px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.tocTitle {
+  margin: 0 0 10px 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.tocList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tocItem {
+  padding: 0;
+}
+
+.tocLink {
+  display: block;
+  padding: 4px 6px;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+  line-height: 1.4;
+  transition: color 0.12s, background 0.12s;
+
+  &:hover {
+    color: white;
+    background: rgba(199, 125, 255, 0.1);
+  }
+}
+
 .viewerContent {
   padding: 28px;
 
@@ -743,6 +932,10 @@
   hr { border: none; border-top: 1px solid rgba(255,255,255,0.12); margin: 1.5em 0; }
   strong { color: white; }
   img { max-width: 100%; border-radius: 10px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 1em; font-size: 0.92em; }
+  th, td { padding: 8px 12px; border: 1px solid rgba(255,255,255,0.12); text-align: left; }
+  th { background: rgba(199,125,255,0.12); color: white; font-weight: 700; }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
 }
 
 .viewerState {

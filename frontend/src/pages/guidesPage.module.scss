@@ -1,0 +1,327 @@
+.container {
+  padding: 32px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.toolbarRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+// ── Game filter ────────────────────────────────────────────────────────────────
+
+.gameFilter {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.filterInput {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--code-bg);
+  color: var(--text-h);
+  font-size: 0.88rem;
+  width: 200px;
+  outline: none;
+  transition: border-color 0.15s ease;
+
+  &:focus {
+    border-color: var(--accent);
+  }
+}
+
+.clearBtn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 1.1rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+
+  &:hover { color: white; }
+}
+
+.gameDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 260px;
+  z-index: 50;
+  background: #13101e;
+  border: 1px solid rgba(199, 125, 255, 0.22);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.gameDropdownItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s;
+
+  &:hover {
+    background: rgba(199, 125, 255, 0.1);
+    color: white;
+  }
+}
+
+.gameDropdownItemActive {
+  color: #c77dff;
+  font-weight: 600;
+}
+
+.gameThumb {
+  width: 48px;
+  height: 27px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+// ── Sort ───────────────────────────────────────────────────────────────────────
+
+.sortControls {
+  position: relative;
+}
+
+.sortTrigger {
+  height: 34px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--code-bg);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.82rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, color 0.15s ease;
+
+  svg { width: 14px; height: 14px; flex-shrink: 0; display: block; }
+
+  &:hover { border-color: var(--accent); color: var(--text-h); }
+}
+
+.sortDropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 150px;
+  z-index: 50;
+  background: #13101e;
+  border: 1px solid rgba(199, 125, 255, 0.2);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sortOption {
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+
+  &:hover { background: rgba(199, 125, 255, 0.1); color: white; }
+}
+
+.sortOptionActive { color: #c77dff; font-weight: 600; }
+
+.sortDivider {
+  border: none;
+  border-top: 1px solid rgba(199, 125, 255, 0.12);
+  margin: 4px 8px;
+}
+
+// ── Grid ───────────────────────────────────────────────────────────────────────
+
+.state {
+  padding: 48px 32px;
+  color: var(--text);
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(170, 59, 255, 0.25);
+    border-color: var(--accent);
+  }
+}
+
+.cardImage {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+}
+
+.cardImagePlaceholder {
+  width: 100%;
+  height: 120px;
+  background: linear-gradient(135deg, #3b002e, #750657);
+}
+
+.cardBody {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.cardGame {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(199, 125, 255, 0.7);
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-h);
+  text-align: left;
+  line-height: 1.3;
+}
+
+.cardDesc {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  color: var(--text);
+  text-align: left;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+.cardAuthor {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  color: var(--text);
+}
+
+.cardAvatar {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.cardAvatarFallback {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(199, 125, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #c77dff;
+}
+
+.cardStars {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(255, 200, 50, 0.85);
+}
+
+// ── Pagination ─────────────────────────────────────────────────────────────────
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.pageBtn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--code-bg);
+  color: var(--text-h);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+
+  &:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: var(--accent-bg);
+  }
+
+  &:disabled { opacity: 0.35; cursor: default; }
+}
+
+.pageInfo {
+  font-size: 0.88rem;
+  color: var(--text);
+}

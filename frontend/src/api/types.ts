@@ -114,6 +114,7 @@ export interface GuideResponse {
   header_image_url: string | null;
   author_avatar_url: string | null;
   is_favorite: boolean;
+  favorite_count: number;
   author_achievement_count: number;
   game_total_achievements: number;
   created_at: string;

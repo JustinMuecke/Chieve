@@ -8,7 +8,8 @@ import HeaderSearch from "../searchBar/HeaderSearch";
 
 import { CgGames, CgProfile } from "react-icons/cg";
 import { PiRankingFill } from "react-icons/pi";
-import { MdReadMore } from "react-icons/md";
+import { TbCards } from "react-icons/tb";
+import { IoBookOutline } from "react-icons/io5";
 import { LiaUserFriendsSolid } from "react-icons/lia";
 import { IoSettingsOutline, IoArrowBackOutline, IoArrowForwardOutline } from "react-icons/io5";
 import { IoMdLogOut } from "react-icons/io";
@@ -90,9 +91,10 @@ function Header() {
       {/* Right: nav + profile */}
       <div className={style.rightArea}>
         <nav className={style.nav}>
+          <Link to="/guides" aria-label="Guides" title="Guides" className={style.navIconSm}><IoBookOutline /></Link>
           <Link to="/games" aria-label="Games" title="Games"><CgGames /></Link>
           <Link to="/ranking" aria-label="Ranking" title="Ranking"><PiRankingFill /></Link>
-          <Link to="/discover" aria-label="Discover" title="Discover"><MdReadMore /></Link>
+          <Link to="/discover" aria-label="Discover" title="Discover"><TbCards /></Link>
         </nav>
 
         <ProfileDropdown />

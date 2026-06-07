@@ -509,37 +509,48 @@
   line-height: 1.5;
 }
 
-.syncBtn {
-  height: 38px;
-  padding: 0 14px;
+.syncRow {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+}
 
+.syncBtn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
+  gap: 6px;
 
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 5px 12px;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-
-  font-size: 0.95rem;
-  font-weight: 700;
-
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: border-color 0.15s ease, color 0.15s ease;
+
+  &:hover:not(:disabled) {
+    border-color: var(--accent-border);
+    color: var(--accent);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
 }
 
-.syncBtn:hover:not(:disabled) {
-  background: rgba(199, 125, 255, 0.35);
-  border-color: #c77dff;
-  transform: translateY(-2px);
+.syncRunning {
+  border-color: var(--accent-border);
+  color: var(--accent);
 }
 
-.syncBtn:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+.syncFailed {
+  border-color: rgba(248, 113, 113, 0.4);
+  color: #f87171;
 }
 
 .syncIcon {

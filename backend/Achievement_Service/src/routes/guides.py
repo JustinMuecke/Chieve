@@ -1,7 +1,7 @@
 import uuid
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, Form, HTTPException, Query, UploadFile
 from fastapi.responses import Response
 
 from src.dependencies.auth import get_current_user_id, get_optional_user_id
@@ -50,6 +50,57 @@ def _to_response(
         created_at=row["created_at"],
         updated_at=row["updated_at"],
     )
+
+
+@router.get("/guides", response_model=dict)
+async def list_all_guides(
+    app_id: int | None = Query(None),
+    sort_by: str = Query("favorites", pattern="^(favorites|recent)$"),
+    order: str = Query("desc", pattern="^(asc|desc)$"),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    services=Depends(get_services),
+    user_id: int | None = Depends(get_optional_user_id),
+):
+    rows, total = await services.postgres.get_all_guides(
+        page=page, page_size=page_size,
+        app_id=app_id, sort_by=sort_by, order=order,
+        user_id=user_id,
+    )
+    if not rows:
+        return {"page": page, "page_size": page_size, "total": 0, "guides": []}
+
+    author_ids = list({row["user_id"] for row in rows})
+    try:
+        users = await services.user_client.get_users_by_ids(author_ids)
+    except UserServiceError:
+        users = []
+    user_map = {u.id: u for u in users}
+
+    guides = []
+    for row in rows:
+        author = user_map.get(row["user_id"])
+        guide_id = row["id"]
+        guides.append(GuideResponse(
+            id=guide_id,
+            user_id=row["user_id"],
+            username=author.username if author else None,
+            author_avatar_url=author.avatar_url if author else None,
+            app_id=row["app_id"],
+            game_name=row["game_name"],
+            title=row["title"],
+            description=row.get("description"),
+            content_url=_content_url(guide_id),
+            header_image_url=_header_url(guide_id) if row.get("header_image_s3_key") else None,
+            is_favorite=bool(row.get("is_favorite", False)),
+            favorite_count=row.get("favorite_count", 0),
+            author_achievement_count=row.get("author_achievement_count", 0),
+            game_total_achievements=row.get("game_total_achievements", 0),
+            created_at=row["created_at"],
+            updated_at=row["updated_at"],
+        ).model_dump())
+
+    return {"page": page, "page_size": page_size, "total": total, "guides": guides}
 
 
 @router.get("/guides/{app_id}", response_model=GameGuidesResponse)
@@ -193,6 +244,20 @@ async def update_guide(
         created_at=guide.created_at,
         updated_at=guide.updated_at,
     )
+
+
+@router.post("/guides/images", status_code=201)
+async def upload_guide_image(
+    file: UploadFile,
+    services=Depends(get_services),
+    user_id: int = Depends(get_current_user_id),
+):
+    if not (file.content_type or "").startswith("image/"):
+        raise HTTPException(status_code=415, detail="Only image files are accepted")
+    image_uuid = str(uuid.uuid4())
+    key = services.s3.inline_image_key(user_id, image_uuid)
+    url = await services.s3.upload_inline_image(key, await file.read(), file.content_type or "image/jpeg")
+    return {"url": url}
 
 
 @router.get("/guides/{guide_id}/content")

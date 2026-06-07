@@ -300,7 +300,7 @@ function GameDetails({ appId, game }: GameDetailsProps) {
           </>
         )}
 
-        {activeTab === "guides" && <GuidesTab appId={appId} initialGuideId={state?.guideId} />}
+        {activeTab === "guides" && <GuidesTab appId={appId} />}
       </div>
     </div>
   );

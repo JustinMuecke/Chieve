@@ -112,7 +112,7 @@ function UserActivity({ activity }: { activity: DayActivity }) {
       ))}
 
       {guides.map(g => (
-        <Link key={g.guide_id} to={`/games/${g.app_id}`} state={{ tab: 'guides', guideId: g.guide_id }} className={style.guideRow}>
+        <Link key={g.guide_id} to={`/games/${g.app_id}/guides/${g.guide_id}`} className={style.guideRow}>
           <span className={style.guideIcon}>📖</span>
           <div className={style.guideInfo}>
             <span className={style.guideTitle}>{g.title}</span>
