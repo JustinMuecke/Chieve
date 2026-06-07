@@ -29,7 +29,7 @@ export interface RecommendationsResponse {
 }
 
 export async function fetchRecommendations(limit = 10): Promise<RecommendationsResponse> {
-  const res = await fetch(`/api/recommendations?limit=${limit}`, { credentials: 'include' });
+  const res = await fetch(`/api/recommendations/?limit=${limit}`, { credentials: 'include' });
   if (!res.ok) throw new Error(`${res.status}`);
   return await res.json() as RecommendationsResponse;
 }
