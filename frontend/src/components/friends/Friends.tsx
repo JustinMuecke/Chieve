@@ -162,14 +162,12 @@ function Friends() {
       <section className={style.hero}>
         <div>
           <p className={style.kicker}>Social Hub</p>
-          <h1>Friends</h1>
           <p className={style.intro}>
-            Track your achievement circle, follow other players, and compare
-            progress with the people who make your backlog worse.
+            Follow your achievement circle, compare progress, and turn friendly rivalry into measurable motivation. Stalk their progress responsibly and find out who is actually finishing their backlog.
           </p>
         </div>
 
-        <div className={style.statsBox}>
+        <div className={style.socialStats}>
           <article>
             <strong>{following.length}</strong>
             <span>Following</span>
