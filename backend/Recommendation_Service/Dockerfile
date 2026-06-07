@@ -8,7 +8,7 @@ COPY pyproject.toml .
 RUN uv pip install --system -e .
 
 # Pre-download the embedding model so first request isn't slow
-RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')" || true
 
 COPY src/ ./src/
 COPY alembic/ ./alembic/
