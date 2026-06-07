@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from pydantic import BaseModel
 
 
@@ -35,6 +35,14 @@ class AchievementDetail(BaseModel):
     global_points: int
     unlocked: bool
     unlocked_at: datetime | None
+
+
+class GameCatalogEntry(BaseModel):
+    app_id: int
+    name: str
+    header_image_url: str | None
+    total_achievements: int
+    player_count: int = 0
 
 
 class GameSummary(BaseModel):
@@ -101,17 +109,40 @@ class FeedGame(BaseModel):
     achievements: list[FeedAchievement]
 
 
+class FeedGuide(BaseModel):
+    guide_id: int
+    title: str
+    description: str | None
+    game_name: str
+    app_id: int
+    published_at: datetime
+
+
 class FeedUserEntry(BaseModel):
     user_id: int
     username: str
     avatar_url: str | None
     games: list[FeedGame]
+    guides: list[FeedGuide] = []
 
 
 class FeedResponse(BaseModel):
     generated_at: datetime
     days: int
     entries: list[FeedUserEntry]
+
+
+# ── Global Search ─────────────────────────────────────────────────────────────
+
+class GameSearchResult(BaseModel):
+    app_id: int
+    name: str
+    header_image_url: str | None
+
+
+class GlobalSearchResponse(BaseModel):
+    games: list[GameSearchResult]
+    users: list[UserSummary]
 
 
 # ── Search ────────────────────────────────────────────────────────────────────
@@ -128,6 +159,60 @@ class AchievementSearchResult(BaseModel):
     game_name: str
 
 
+# ── Guides ────────────────────────────────────────────────────────────────────
+
+class GuideResponse(BaseModel):
+    id: int
+    user_id: int
+    username: str | None
+    author_avatar_url: str | None = None
+    app_id: int
+    game_name: str
+    title: str
+    description: str | None = None
+    content_url: str
+    header_image_url: str | None = None
+    is_favorite: bool = False
+    author_achievement_count: int = 0
+    game_total_achievements: int = 0
+    created_at: datetime
+    updated_at: datetime
+
+
+class GameGuidesResponse(BaseModel):
+    app_id: int
+    game_name: str
+    my_guides: list[GuideResponse]
+    other_guides: list[GuideResponse]
+
+
+# ── User Profile ─────────────────────────────────────────────────────────────
+
+class UserAchievementBreakdown(BaseModel):
+    perfect: int
+    legendary: int
+    rare: int
+    uncommon: int
+    common: int
+    total: int
+
+
+# ── Internal (Recommendation Service) ────────────────────────────────────────
+
+class GameInternalDetail(BaseModel):
+    app_id: int
+    name: str
+    header_image_url: str | None
+    description: str | None
+    tags: list[str] | None
+    achievement_count: int
+
+
+class UserGameCompletion(BaseModel):
+    app_id: int
+    completion_pct: float
+
+
 # ── Milestones ────────────────────────────────────────────────────────────────
 
 class MilestoneEntry(BaseModel):
@@ -138,3 +223,14 @@ class MilestoneEntry(BaseModel):
     achievement_id: int | None
     achievement_name: str | None
     achieved_at: datetime
+
+
+class StatsTimelineEntry(BaseModel):
+    date: date
+    daily_achievements: int
+    daily_points: int
+    cumulative_points: int
+
+
+class StatsResponse(BaseModel):
+    timeline: list[StatsTimelineEntry]

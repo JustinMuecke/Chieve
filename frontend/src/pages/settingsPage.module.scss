@@ -1,0 +1,584 @@
+.page {
+  padding: 32px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.pageTitle {
+  margin: 0 0 32px;
+}
+
+.section {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  margin: 0 0 20px;
+  text-align: left;
+}
+
+// ── Profile ─────────────────────────────────────────────────────────
+
+.bannerRow {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.bannerPreview {
+  position: relative;
+  width: 100%;
+  height: 120px;
+  border-radius: 8px;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bannerPlaceholder {
+  font-size: 0.82rem;
+  color: var(--text);
+  opacity: 0.5;
+}
+
+.bannerOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.88rem;
+  color: white;
+}
+
+.uploadBannerBtn {
+  align-self: flex-start;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 7px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--accent);
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(170, 59, 255, 0.2);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+}
+
+.descriptionRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.descriptionLabel {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text);
+}
+
+.descriptionTextarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--code-bg);
+  color: var(--text-h);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent-border);
+  }
+}
+
+.descriptionFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.charCount {
+  font-size: 0.75rem;
+  color: var(--text);
+  opacity: 0.5;
+}
+
+.saveBtn {
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 7px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--accent);
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(170, 59, 255, 0.2);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+}
+
+.successMsg {
+  font-size: 0.82rem;
+  color: #4ade80;
+  margin: 0;
+  text-align: left;
+}
+
+// ── Avatar ──────────────────────────────────────────────────────────
+
+.avatarRow {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.currentAvatar {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.avatarImg {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent-border);
+  display: block;
+}
+
+.avatarInitial {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: var(--accent-bg);
+  border: 2px solid var(--accent-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.avatarOverlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.4rem;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 1; }
+}
+
+.avatarOptions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.avatarOption {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+
+  &:hover:not(:disabled) {
+    border-color: var(--accent-border);
+    background: var(--accent-bg);
+    color: var(--accent);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+}
+
+.avatarOptionActive {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.optionThumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.uploadIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  color: var(--text);
+}
+
+.activeDot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.errorMsg {
+  margin-top: 12px;
+  font-size: 0.82rem;
+  color: #f87171;
+  text-align: left;
+}
+
+// ── Platforms ───────────────────────────────────────────────────────
+
+.platformRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.platformInfo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.steamIcon {
+  width: 36px;
+  height: 36px;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.platformName {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-h);
+  margin: 0;
+}
+
+.platformSub {
+  font-size: 0.78rem;
+  color: var(--text);
+  margin: 0;
+}
+
+.connectedActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.confirmRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.confirmLabel {
+  font-size: 0.82rem;
+  color: var(--text);
+}
+
+.confirmYes {
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  background: rgba(248, 113, 113, 0.1);
+  color: #f87171;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(248, 113, 113, 0.2);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+}
+
+.confirmNo {
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: var(--accent-bg);
+  }
+}
+
+.disconnectBtn {
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    border-color: rgba(248, 113, 113, 0.4);
+    color: #f87171;
+  }
+}
+
+.connectedBadge {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.connectBtn {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  padding: 8px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    background: rgba(170, 59, 255, 0.2);
+    border-color: var(--accent);
+  }
+}
+
+
+
+
+.settingsPage {
+  min-height: 100vh;
+  padding: 48px 32px;
+
+  background:
+    radial-gradient(circle at top left, rgba(124, 58, 237, 0.14), transparent 32%),
+    linear-gradient(180deg, #111018 0%, #15111d 45%, #120010 100%);
+
+  color: white;
+}
+
+.settingsCard {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 32px;
+
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(199, 125, 255, 0.22);
+
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.28),
+    inset 0 0 24px rgba(255, 255, 255, 0.025);
+}
+
+.sectionHeader {
+  margin-bottom: 28px;
+}
+
+.kicker {
+  margin: 0 0 8px 0;
+
+  color: #caa7ff;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.sectionHeader h1 {
+  margin: 0 0 10px 0;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  line-height: 1;
+}
+
+.sectionHeader p {
+  max-width: 680px;
+  margin: 0;
+
+  color: rgba(255, 255, 255, 0.62);
+  line-height: 1.6;
+}
+
+.syncPanel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+
+  padding: 24px;
+
+  border-radius: 22px;
+  background: rgba(20, 16, 28, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.syncPanel h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.25rem;
+}
+
+.syncPanel p {
+  margin: 0;
+
+  color: rgba(255, 255, 255, 0.58);
+  line-height: 1.5;
+}
+
+.syncBtn {
+  height: 38px;
+  padding: 0 14px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+
+  font-size: 0.95rem;
+  font-weight: 700;
+
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.syncBtn:hover:not(:disabled) {
+  background: rgba(199, 125, 255, 0.35);
+  border-color: #c77dff;
+  transform: translateY(-2px);
+}
+
+.syncBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.syncIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.spinning {
+  animation: spin 0.9s linear infinite;
+}
+
+.syncRunning {
+  border-color: rgba(199, 125, 255, 0.55);
+  background: rgba(199, 125, 255, 0.18);
+}
+
+.syncFailed {
+  border-color: rgba(248, 113, 113, 0.45);
+  background: rgba(248, 113, 113, 0.12);
+  color: #fca5a5;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 700px) {
+  .syncPanel {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

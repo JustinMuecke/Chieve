@@ -4,6 +4,7 @@ from src.services.postgres_service import PostgresService
 from src.services.s3_service import S3Service
 from src.services.github_oauth import GithubOAuthService
 from src.services.platforms.steam.steam_service import SteamService
+from src.services.achievement_service_client import AchievementServiceClient
 
 
 class ServiceManager:
@@ -22,3 +23,4 @@ class ServiceManager:
         )
         self.github_oauth = GithubOAuthService(auth=self.auth, postgres=self.postgres, s3=self.s3)
         self.steam = SteamService(postgres=self.postgres, s3=self.s3)
+        self.achievement_client = AchievementServiceClient()

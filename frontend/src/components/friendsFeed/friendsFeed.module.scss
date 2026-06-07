@@ -1,0 +1,207 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.title {
+  margin: 0 0 16px 0;
+  font-size: 1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.state {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.9rem;
+  padding: 24px 0;
+}
+
+.dayGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.dayLabel {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.28);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.userActivity {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 0 8px 0;
+
+  & + & {
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    margin-top: 4px;
+  }
+}
+
+.entryHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.userLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: white;
+  font-weight: 700;
+  font-size: 0.9rem;
+
+  &:hover .username {
+    color: #c77dff;
+  }
+}
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatarPlaceholder {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(199, 125, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #c77dff;
+}
+
+.username {
+  transition: color 0.15s;
+}
+
+.summary {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.35);
+  margin-left: auto;
+}
+
+.gameRow,
+.guideRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.gameThumb {
+  width: 48px;
+  height: 27px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.gameInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gameName {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.achievementList {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.achievementChip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.52);
+
+  img {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+  }
+}
+
+.more {
+  font-size: 0.72rem;
+  color: rgba(199, 125, 255, 0.6);
+}
+
+.guideIcon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  width: 28px;
+  text-align: center;
+}
+
+.guideInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.guideTitle {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.guideGame {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.timestamp {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.28);
+  flex-shrink: 0;
+}

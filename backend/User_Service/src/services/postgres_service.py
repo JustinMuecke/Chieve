@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import selectinload
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 
 from src.models.follow import Follow
 from src.models.user import LinkedAccount, User
@@ -46,6 +46,22 @@ class PostgresService:
                     user.avatar_url = avatar_url
                 await session.commit()
 
+    async def update_user_description(self, user_id: int, description: str | None) -> None:
+        async with self._session() as session:
+            result = await session.execute(select(User).where(User.id == user_id))
+            user = result.scalar_one_or_none()
+            if user:
+                user.description = description
+                await session.commit()
+
+    async def update_user_banner(self, user_id: int, banner_url: str | None) -> None:
+        async with self._session() as session:
+            result = await session.execute(select(User).where(User.id == user_id))
+            user = result.scalar_one_or_none()
+            if user:
+                user.banner_url = banner_url
+                await session.commit()
+
     async def update_user_avatar(self, user_id: int, avatar_url: str) -> None:
         async with self._session() as session:
             result = await session.execute(select(User).where(User.id == user_id))
@@ -66,6 +82,36 @@ class PostgresService:
             if account:
                 account.avatar_url = avatar_url
                 await session.commit()
+
+    async def delete_linked_account(self, user_id: int, platform: str) -> None:
+        async with self._session() as session:
+            result = await session.execute(
+                select(LinkedAccount).where(
+                    LinkedAccount.user_id == user_id,
+                    LinkedAccount.platform == platform,
+                )
+            )
+            account = result.scalar_one_or_none()
+            if not account:
+                return
+
+            platform_avatar = account.avatar_url
+
+            await session.execute(
+                delete(LinkedAccount).where(
+                    LinkedAccount.user_id == user_id,
+                    LinkedAccount.platform == platform,
+                )
+            )
+
+            # If the user's active avatar came from this platform, fall back to GitHub avatar
+            if platform_avatar:
+                user_result = await session.execute(select(User).where(User.id == user_id))
+                user = user_result.scalar_one_or_none()
+                if user and user.avatar_url == platform_avatar:
+                    user.avatar_url = user.github_avatar_url
+
+            await session.commit()
 
     async def link_platform(self, user_id: int, platform: str, platform_user_id: str) -> LinkedAccount:
         async with self._session() as session:
@@ -143,3 +189,36 @@ class PostgresService:
                 .order_by(Follow.created_at.desc())
             )
             return list(result.scalars().all())
+
+    async def search_users(self, query: str, limit: int) -> list[User]:
+        async with self._session() as session:
+            result = await session.execute(
+                select(User)
+                .where(User.username.ilike(f"%{query}%"))
+                .order_by(User.username)
+                .limit(limit)
+            )
+            return list(result.scalars().all())
+
+    async def get_user_social_stats(self, user_id: int, viewer_id: int | None) -> dict:
+        async with self._session() as session:
+            followers_result = await session.execute(
+                select(func.count()).select_from(Follow).where(Follow.following_id == user_id)
+            )
+            following_result = await session.execute(
+                select(func.count()).select_from(Follow).where(Follow.follower_id == user_id)
+            )
+            is_following = False
+            if viewer_id is not None and viewer_id != user_id:
+                follow_check = await session.execute(
+                    select(Follow).where(
+                        Follow.follower_id == viewer_id,
+                        Follow.following_id == user_id,
+                    )
+                )
+                is_following = follow_check.scalar_one_or_none() is not None
+            return {
+                "followers_count": followers_result.scalar_one(),
+                "following_count": following_result.scalar_one(),
+                "is_following": is_following,
+            }

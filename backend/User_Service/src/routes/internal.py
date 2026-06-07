@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.dependencies.service_auth import get_calling_service
 from src.dependencies.services import get_services
-from src.models.schemas import UserSummary
+from src.models.schemas import FullUserProfile, UserSummary
 
 router = APIRouter(prefix="/internal")
 
@@ -50,3 +50,36 @@ async def get_users_by_ids(
         raise HTTPException(status_code=400, detail="ids must be comma-separated integers")
     users = await services.postgres.get_users_by_ids(user_ids)
     return [UserSummary(id=u.id, username=u.username, avatar_url=u.avatar_url) for u in users]
+
+
+@router.get("/users/search", response_model=list[UserSummary])
+async def search_users(
+    q: str = Query(..., min_length=2),
+    limit: int = Query(5, ge=1, le=20),
+    services=Depends(get_services),
+    _service: str = Depends(get_calling_service),
+):
+    users = await services.postgres.search_users(q, limit)
+    return [UserSummary(id=u.id, username=u.username, avatar_url=u.avatar_url) for u in users]
+
+
+@router.get("/users/{user_id}/social-profile", response_model=FullUserProfile)
+async def get_user_social_profile(
+    user_id: int,
+    viewer_id: int | None = Query(None),
+    services=Depends(get_services),
+    _service: str = Depends(get_calling_service),
+):
+    """Full profile data + social counts for a user, from the perspective of viewer_id."""
+    user = await services.postgres.get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    social = await services.postgres.get_user_social_stats(user_id, viewer_id)
+    return FullUserProfile(
+        id=user.id,
+        username=user.username,
+        avatar_url=user.avatar_url,
+        banner_url=user.banner_url,
+        description=user.description,
+        **social,
+    )

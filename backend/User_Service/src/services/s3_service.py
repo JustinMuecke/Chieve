@@ -30,20 +30,36 @@ class S3Service:
                 ContentType=resp.headers.get("content-type", "image/jpeg"),
             )
 
-        return self.get_url(key)
+        return self.avatar_proxy_url(key)
 
-    async def get_presigned_put_url(self, key: str, content_type: str = "image/jpeg") -> str:
-        async with self._client() as s3:
+    async def get_presigned_put_url(self, key: str) -> str:
+        # Must sign with the public URL — the host is included in the signature,
+        # so generating with the internal URL and replacing it later breaks verification.
+        # ContentType is intentionally excluded from signed params so any image type works.
+        public_client = self._session.client("s3", endpoint_url=self._public_url)
+        async with public_client as s3:
             url = await s3.generate_presigned_url(
                 "put_object",
-                Params={"Bucket": self.BUCKET, "Key": key, "ContentType": content_type},
+                Params={"Bucket": self.BUCKET, "Key": key},
                 ExpiresIn=300,
             )
-        # Replace internal docker URL with public URL so browsers can reach it
-        return url.replace(self._url, self._public_url)
+        return url
 
-    def get_url(self, key: str) -> str:
-        return f"{self._public_url}/{self.BUCKET}/{key}"
+    async def get_object(self, key: str) -> tuple[bytes, str]:
+        async with self._client() as s3:
+            response = await s3.get_object(Bucket=self.BUCKET, Key=key)
+            body = await response["Body"].read()
+            content_type = response.get("ContentType", "application/octet-stream")
+            return body, content_type
+
+    def avatar_proxy_url(self, key: str) -> str:
+        return f"/api/user/avatar/{key}"
 
     def avatar_key(self, user_id: int, source: str) -> str:
         return f"{user_id}/{source}"
+
+    def banner_key(self, user_id: int) -> str:
+        return f"{user_id}/banner"
+
+    def banner_proxy_url(self, user_id: int) -> str:
+        return f"/api/user/banner/{user_id}"

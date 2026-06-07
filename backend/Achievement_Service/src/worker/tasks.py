@@ -4,6 +4,7 @@ import os
 from src.worker.celery_app import celery_app
 from src.services.postgres_service import PostgresService
 from src.services.milestone_service import MilestoneService
+from src.services.steam_api_service import SteamApiService
 from src.services.user_service_client import UserServiceClient
 from src.services.platforms.dispatcher import get_platform_service
 from src.models.errors import UserServiceError
@@ -63,6 +64,49 @@ async def _platform_sync(task, user_id: int):
 
     await pg.upsert_profile_stats(user_id)
     return {"status": "complete", "games_processed": total_games}
+
+
+@celery_app.task(name="backfill_game_descriptions")
+def backfill_game_descriptions_task():
+    asyncio.run(_backfill_game_descriptions())
+
+
+async def _backfill_game_descriptions():
+    """Fetches store descriptions for all games that still have description=NULL.
+    Runs 1 request per second to avoid Steam rate limits."""
+    pg = _make_postgres()
+    api = SteamApiService()
+
+    app_ids = await pg.get_games_missing_descriptions()
+    for app_id in app_ids:
+        try:
+            store = await api.get_store_details(app_id)
+            if store:
+                await pg.update_game_store_details(app_id, **store)
+        except Exception:
+            pass
+        await asyncio.sleep(1.0)
+
+
+@celery_app.task(name="backfill_game_tags")
+def backfill_game_tags_task():
+    asyncio.run(_backfill_game_tags())
+
+
+async def _backfill_game_tags():
+    """Fetches rich user-defined tags from SteamSpy for all games. 1 req/sec."""
+    pg = _make_postgres()
+    api = SteamApiService()
+
+    app_ids = await pg.get_all_game_app_ids()
+    for app_id in app_ids:
+        try:
+            tags = await api.get_steamspy_tags(app_id)
+            if tags:
+                await pg.update_game_store_details(app_id, description=None, tags=tags)
+        except Exception:
+            pass
+        await asyncio.sleep(1.0)
 
 
 @celery_app.task(name="refresh_community_points")

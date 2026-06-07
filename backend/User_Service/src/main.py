@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from src.services.ServiceManager import ServiceManager
 from src.routes import login, me, steam
-from src.routes import social, internal
+from src.routes import social, internal, avatar, profile, banner
 
 
 @asynccontextmanager
@@ -17,3 +17,6 @@ app.include_router(steam.router, prefix="/api/user")
 app.include_router(me.router, prefix="/api/user")
 app.include_router(social.router, prefix="/api/user")
 app.include_router(internal.router)
+app.include_router(avatar.router, prefix="/api/user")
+app.include_router(banner.router, prefix="/api/user")
+app.include_router(profile.router, prefix="/api/user")

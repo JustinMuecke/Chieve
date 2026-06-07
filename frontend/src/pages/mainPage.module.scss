@@ -1,0 +1,35 @@
+.heroText h1 {
+  line-height: 1.05;
+}
+
+.dashboardSection {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 32px;
+  padding: 48px 0;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.feedColumn {
+  min-width: 0;
+}
+
+.wishlistColumn {
+  min-width: 0;
+  position: sticky;
+  top: 80px;
+  align-self: start;
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
+}
+
+@media (max-width: 860px) {
+  .dashboardSection {
+    grid-template-columns: 1fr;
+  }
+
+  .wishlistColumn {
+    position: static;
+  }
+}

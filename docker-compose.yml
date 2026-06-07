@@ -1,8 +1,8 @@
-name: chieve-backend
+name: chieve
 
 services:
   postgres:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -54,17 +54,17 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     entrypoint: >
       /bin/sh -c "
-      /usr/bin/mc config host add local http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD;
+      /usr/bin/mc alias set local http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD;
       /usr/bin/mc mb -p local/avatars;
-      /usr/bin/mc anonymous set public local/avatars;
+      /usr/bin/mc mb -p local/guides;
       exit 0;
       "
 
   user_service:
     build:
-      context: ./User_Service
+      context: ./backend/User_Service
     env_file:
-      - ./User_Service/.env
+      - ./backend/User_Service/.env
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_USER: ${POSTGRES_USER}
@@ -77,6 +77,11 @@ services:
       S3_ACCESS_KEY: ${MINIO_ROOT_USER}
       S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       STEAM_API_KEY: ${STEAM_API_KEY}
+      FRONTEND_URL: http://localhost:5173
+      OAUTH_CALLBACK_URL: http://localhost:5173/api/user/auth/callback
+      STEAM_CALLBACK_URL: http://localhost:5173/api/user/steam/callback
+      STEAM_REALM: http://localhost:5173
+      ACHIEVEMENT_SERVICE_URL: http://achievement_service:8001
     ports:
       - "8000:8000"
     depends_on:
@@ -87,9 +92,9 @@ services:
 
   achievement_service:
     build:
-      context: ./Achievement_Service
+      context: ./backend/Achievement_Service
     env_file:
-      - ./Achievement_Service/.env
+      - ./backend/Achievement_Service/.env
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_USER: ${POSTGRES_USER}
@@ -100,6 +105,10 @@ services:
       REDIS_URL: redis://redis:6379/0
       USER_SERVICE_URL: http://user_service:8000
       STEAM_API_KEY: ${STEAM_API_KEY}
+      S3_URL: http://minio:9000
+      S3_PUBLIC_URL: http://localhost:9000
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
     ports:
       - "8001:8001"
     depends_on:
@@ -107,12 +116,14 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
 
   celery_worker:
     build:
-      context: ./Achievement_Service
+      context: ./backend/Achievement_Service
     env_file:
-      - ./Achievement_Service/.env
+      - ./backend/Achievement_Service/.env
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_USER: ${POSTGRES_USER}
@@ -129,6 +140,64 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+
+  recommendation_service:
+    build:
+      context: ./backend/Recommendation_Service
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      ENV: ${ENV:-development}
+      JWT_SECRET: ${JWT_SECRET}
+      REDIS_URL: redis://redis:6379/0
+      ACHIEVEMENT_SERVICE_URL: http://achievement_service:8001
+    ports:
+      - "8002:8002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      achievement_service:
+        condition: service_started
+
+  recommendation_celery_worker:
+    build:
+      context: ./backend/Recommendation_Service
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      ENV: ${ENV:-development}
+      JWT_SECRET: ${JWT_SECRET}
+      REDIS_URL: redis://redis:6379/0
+      ACHIEVEMENT_SERVICE_URL: http://achievement_service:8001
+    command: celery -A src.worker.celery_app worker --beat --loglevel=info --concurrency=1 --queues=recommendation
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      ACHIEVEMENT_SERVICE_URL: http://achievement_service:8001
+      USER_SERVICE_URL: http://user_service:8000
+      RECOMMENDATION_SERVICE_URL: http://recommendation_service:8002
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - user_service
+      - achievement_service
+      - recommendation_service
 
 volumes:
   postgres_data:

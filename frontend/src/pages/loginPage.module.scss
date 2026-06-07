@@ -1,0 +1,102 @@
+.page {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 60% 40%, #3b002e 0%, #0d0010 60%);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 48px 56px;
+  max-width: 420px;
+  width: 100%;
+
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(181, 108, 255, 0.25);
+  border-radius: 16px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(181, 108, 255, 0.1);
+
+  text-align: center;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.title {
+  margin: 0;
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: white;
+  text-shadow: 0 0 32px rgba(199, 125, 255, 0.5);
+}
+
+.tagline {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.02em;
+}
+
+.sub {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.6;
+}
+
+.githubBtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 28px;
+  width: 100%;
+  justify-content: center;
+
+  background: white;
+  color: #0d0010;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    background: #f0e6ff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(170, 59, 255, 0.35);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.githubIcon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.25);
+}

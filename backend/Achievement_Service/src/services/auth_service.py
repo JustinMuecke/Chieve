@@ -16,3 +16,15 @@ class AuthService:
             raise TokenExpiredError("Session expired") from e
         except jwt.InvalidTokenError as e:
             raise TokenInvalidError("Invalid token") from e
+
+    def decode_service_token(self, token: str) -> str:
+        """Validates a service-to-service JWT and returns the calling service name."""
+        try:
+            payload = jwt.decode(token, self.jwt_secret, algorithms=["HS256"])
+            if payload.get("type") != "service":
+                raise TokenInvalidError("Not a service token")
+            return payload["service"]
+        except jwt.ExpiredSignatureError as e:
+            raise TokenExpiredError("Service token expired") from e
+        except jwt.InvalidTokenError as e:
+            raise TokenInvalidError("Invalid service token") from e

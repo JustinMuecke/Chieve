@@ -1,0 +1,340 @@
+.profileFeed {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.header {
+  padding: 24px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(199, 125, 255, 0.18);
+}
+
+.kicker {
+  margin: 0 0 6px 0;
+  color: #caa7ff;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.header h3 {
+  margin: 0;
+}
+
+.description {
+  max-width: 680px;
+  margin: 8px 0 0 0;
+  color: rgba(255, 255, 255, 0.62);
+  line-height: 1.5;
+}
+
+// ── Timeline ──────────────────────────────────────────────────────────────────
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.dayGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dayLabel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  span {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+}
+
+.dayItems {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+// ── Game block ────────────────────────────────────────────────────────────────
+
+.gameBlock {
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.038);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  transition: 0.15s ease;
+
+  &:hover {
+    border-color: rgba(199, 125, 255, 0.2);
+  }
+}
+
+.gameHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  text-decoration: none;
+  color: inherit;
+  transition: 0.15s ease;
+
+  &:hover {
+    background: rgba(199, 125, 255, 0.06);
+  }
+}
+
+.gameThumb {
+  width: 52px;
+  height: 30px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.gameThumbPlaceholder {
+  width: 52px;
+  height: 30px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  background: rgba(199, 125, 255, 0.12);
+  border: 1px solid rgba(199, 125, 255, 0.2);
+}
+
+.gameName {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.totalPts {
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.75rem;
+  font-weight: 800;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+
+// ── Guide block ───────────────────────────────────────────────────────────────
+
+.guideBlock {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: rgba(59, 130, 246, 0.06);
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  text-decoration: none;
+  color: inherit;
+  transition: 0.15s ease;
+
+  &:hover {
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.32);
+    transform: translateY(-2px);
+  }
+}
+
+.guideIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(59, 130, 246, 0.14);
+  border: 1px solid rgba(59, 130, 246, 0.24);
+  font-size: 1.1rem;
+}
+
+.guideInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.guideLabel {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #93c5fd;
+}
+
+.guideTitle {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.guideBanner {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 90px;
+}
+
+.guideBannerImg {
+  width: 90px;
+  height: 42px;
+  object-fit: cover;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: block;
+}
+
+.guideBannerName {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.55);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+// ── Icon row ──────────────────────────────────────────────────────────────────
+
+.iconRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+}
+
+.iconWrapper {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  cursor: default;
+
+  // CSS tooltip
+  &::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 7px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.92);
+    padding: 5px 10px;
+    border-radius: 8px;
+    background: rgba(18, 14, 26, 0.97);
+    border: 1px solid rgba(199, 125, 255, 0.3);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    z-index: 20;
+  }
+
+  &:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+.iconImg {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  object-fit: cover;
+  display: block;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: 0.15s ease;
+
+  .iconWrapper:hover & {
+    border-color: rgba(199, 125, 255, 0.45);
+    box-shadow: 0 0 10px rgba(199, 125, 255, 0.25);
+  }
+}
+
+.iconFallback {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(199, 125, 255, 0.14);
+  border: 1px solid rgba(199, 125, 255, 0.22);
+  font-size: 1.1rem;
+  transition: 0.15s ease;
+
+  .iconWrapper:hover & {
+    border-color: rgba(199, 125, 255, 0.45);
+    background: rgba(199, 125, 255, 0.22);
+  }
+}
+
+// ── Empty / loading ───────────────────────────────────────────────────────────
+
+.emptyState {
+  padding: 36px;
+  text-align: center;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px dashed rgba(199, 125, 255, 0.28);
+
+  h4 {
+    margin: 0 0 8px 0;
+  }
+
+  p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.56);
+  }
+}
+
+@media (max-width: 700px) {
+  .iconRow {
+    gap: 6px;
+  }
+
+  .iconWrapper,
+  .iconImg,
+  .iconFallback {
+    width: 36px;
+    height: 36px;
+  }
+}
