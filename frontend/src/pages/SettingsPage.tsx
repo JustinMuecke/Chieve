@@ -2,6 +2,11 @@ import { useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useSelectAvatar, useUploadCustomAvatar, useUnlinkPlatform, useUpdateProfile, useUploadBanner } from '../api/user';
 import style from './settingsPage.module.scss';
+import { useSync } from '../api/sync';
+
+
+
+
 
 function SettingsPage() {
   const { user } = useAuth();
@@ -18,6 +23,18 @@ function SettingsPage() {
   const githubOption = user.avatar_options.find(o => o.source === 'github');
   const steamOption = user.avatar_options.find(o => o.source === 'steam');
   const hasSteam = user.linked_platforms.includes('steam');
+
+  const { trigger, isRunning, progress, isRateLimited, isFailed } = useSync();
+
+  const syncLabel = isRunning
+    ? progress !== null
+      ? `${progress}%`
+      : "Syncing…"
+    : isRateLimited
+      ? "Rate limited"
+      : isFailed
+        ? "Sync failed"
+        : "Sync Steam achievements";
 
   const activeSource =
     user.avatar_options.find(o => o.url === user.avatar_url)?.source ??
@@ -216,10 +233,44 @@ function SettingsPage() {
           )}
         </div>
       </section>
+   {/* ──  Sync ─────────────────────────────────────────── */}
+    <div className={style.syncPanel}>
+          <div>
+            <h2>Steam achievement sync</h2>
+            <p>
+              Refresh your achievements, unlocked games, and progress data.
+              Syncing may be rate limited.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className={`${style.syncBtn} ${
+              isRunning ? style.syncRunning : ""
+            } ${isFailed ? style.syncFailed : ""}`}
+            onClick={trigger}
+            disabled={isRunning || isRateLimited}
+            title={
+              isRateLimited
+                ? "You can sync once every 15 minutes"
+                : "Sync your Steam achievements"
+            }
+          >
+            <span
+              className={`${style.syncIcon} ${
+                isRunning ? style.spinning : ""
+              }`}
+            >
+              ↻
+            </span>
+            <span>{syncLabel}</span>
+          </button>
+        </div>
+
     </div>
-    
+
   );
-  
+
 }
 
 export default SettingsPage;

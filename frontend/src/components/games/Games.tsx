@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameCatalog } from '../../api/games';
-import { useSync } from '../../api/sync';
+
 import style from './games.module.scss';
 
 function Games() {
@@ -9,7 +9,7 @@ function Games() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
-  const { trigger, isRunning, progress, isRateLimited, isFailed } = useSync();
+
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -23,26 +23,13 @@ function Games() {
 
   const totalPages = data ? Math.ceil(data.total / data.page_size) : 0;
 
-  const syncLabel = isRunning
-    ? progress !== null ? `${progress}%` : '…'
-    : isRateLimited ? 'Rate limited'
-    : isFailed ? 'Failed'
-    : 'Sync';
 
   return (
     <div className={style.gamesContainer}>
       <div className={style.toolbar}>
         <h2>GAME CATALOG</h2>
         <div className={style.toolbarRight}>
-          <button
-            className={`${style.syncBtn} ${isRunning ? style.syncRunning : ''} ${isFailed ? style.syncFailed : ''}`}
-            onClick={trigger}
-            disabled={isRunning || isRateLimited}
-            title={isRateLimited ? 'You can sync once every 15 minutes' : 'Sync your Steam achievements'}
-          >
-            <span className={`${style.syncIcon} ${isRunning ? style.spinning : ''}`}>↻</span>
-            {}
-          </button>
+          
           <input
             className={style.searchInput}
             type="search"
