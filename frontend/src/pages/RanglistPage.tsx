@@ -1,5 +1,3 @@
-
-import React from 'react';
 import Ranglist from '../components/ranglist/Ranglist';
 
 function RanglistPage() {
