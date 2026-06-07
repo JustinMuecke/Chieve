@@ -12,6 +12,7 @@ import { MdReadMore } from "react-icons/md";
 import { LiaUserFriendsSolid } from "react-icons/lia";
 import { IoSettingsOutline, IoArrowBackOutline, IoArrowForwardOutline } from "react-icons/io5";
 import { IoMdLogOut } from "react-icons/io";
+import { TbCards } from "react-icons/tb";
 
 
 function ProfileDropdown() {
@@ -92,7 +93,7 @@ function Header() {
         <nav className={style.nav}>
           <Link to="/games" aria-label="Games" title="Games"><CgGames /></Link>
           <Link to="/ranking" aria-label="Ranking" title="Ranking"><PiRankingFill /></Link>
-          <Link to="/discover" aria-label="Discover" title="Discover"><MdReadMore /></Link>
+          <Link to="/discover" aria-label="Discover" title="Discover"><TbCards /></Link>
         </nav>
 
         <ProfileDropdown />
