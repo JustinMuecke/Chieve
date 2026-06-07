@@ -34,6 +34,16 @@ export async function fetchRecommendations(limit = 10): Promise<RecommendationsR
   return await res.json() as RecommendationsResponse;
 }
 
+
+export function useRecommendations(limit = 10) {
+  return useQuery<RecommendationsResponse>({
+    queryKey: ["recommendations", limit],
+    queryFn: () => fetchRecommendations(limit),
+  });
+}
+
+
+
 export function useWishlist() {
   return useQuery<WishlistItem[]>({
     queryKey: ['wishlist'],
@@ -85,3 +95,5 @@ export function useRemoveFromWishlist() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['wishlist'] }),
   });
 }
+
+

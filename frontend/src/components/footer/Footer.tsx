@@ -13,7 +13,7 @@ function Footer() {
 
         <div className={style.footerMeta}>
           <p>© 2026 Chieve Collector</p>
-          <p> Hackathon UUlm</p>
+          <p>Hackathon UUlm</p>
           <p>All rights reserved.</p>
         </div>
       </div>
